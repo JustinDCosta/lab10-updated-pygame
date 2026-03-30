@@ -135,3 +135,14 @@ also make sure to run the test after to check if the code works.
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 14:28
 - **Prompt**: have it a clock and configuaration setting in window to change speed add more blocks, increase block sizes, option to make the blocks interactable(as in can have collisions between 2 or more blocks).
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 14:31
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: have it a clock and configuaration setting in window to change speed add more blocks, increase block sizes, option to make the blocks interactable(as in can have collisions between 2 or more blocks).
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Added in-window clock, keyboard-driven configuration overlay, dynamic speed/block-count/size controls, optional block collisions with resolution logic, and expanded tests for the new runtime features.
+- **Context and Reasons for Changes**: User requested richer runtime controls and optional inter-block interaction while preserving existing animation behavior.
+
