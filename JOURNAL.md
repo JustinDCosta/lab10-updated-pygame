@@ -70,3 +70,19 @@ help me implement this with stubs and todos in main.py
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 13:34
 - **Prompt**: I have made the changes and I want you to write the tests for it to check if they work correctly
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 13:42
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: I have made the changes and I want you to write the tests for it to check if they work correctly
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Created comprehensive test_main.py with 27 test cases covering all functions, fixtures, edge cases, and integration scenarios. All tests pass.
+- **Context and Reasons for Changes**: User provided implementation changes (per-square colors, random drift, improved edge clamping) and requested test coverage. Tests verify correctness of the implementation.
+
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 13:45
+- **Prompt**: clean up the code. Optimise it. and remove the comments such as todos and the stubs. also make sure to run the test after to check if the code works.

@@ -17,3 +17,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 13:34
 - **Prompt**: I have made the changes and I want you to write the tests for it to check if they work correctly
 
+### 30-03-2026 13:45
+- **Prompt**: clean up the code. Optimise it. and remove the comments such as todos and the stubs. also make sure to run the test after to check if the code works.
+
