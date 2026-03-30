@@ -146,3 +146,8 @@ also make sure to run the test after to check if the code works.
 - **Changes Made**: Added in-window clock, keyboard-driven configuration overlay, dynamic speed/block-count/size controls, optional block collisions with resolution logic, and expanded tests for the new runtime features.
 - **Context and Reasons for Changes**: User requested richer runtime controls and optional inter-block interaction while preserving existing animation behavior.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 14:36
+- **Prompt**: revert back to original one without the clock and these features as i will manually add them myself.
