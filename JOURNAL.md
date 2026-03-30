@@ -151,3 +151,14 @@ also make sure to run the test after to check if the code works.
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 14:36
 - **Prompt**: revert back to original one without the clock and these features as i will manually add them myself.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 14:37
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: revert back to original one without the clock and these features as i will manually add them myself.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Restored main.py and test_main.py to pre-clock/config/collision baseline and verified tests pass in both pytest and direct file execution modes.
+- **Context and Reasons for Changes**: User requested rollback to the simpler original version to manually implement advanced features.
+

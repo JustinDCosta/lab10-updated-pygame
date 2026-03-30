@@ -18,30 +18,20 @@ class DummyRect:
     def inflate(self, dx: int, dy: int) -> "DummyRect":
         return DummyRect(self.x - dx // 2, self.y - dy // 2, self.w + dx, self.h + dy)
 
-    def move(self, dx: int, dy: int) -> "DummyRect":
-        return DummyRect(self.x + dx, self.y + dy, self.w, self.h)
-
 
 # Mock pygame before importing main
 pygame_mock = MagicMock()
 pygame_mock.Rect = DummyRect
 sys.modules["pygame"] = pygame_mock
 
-import main as app
-
 from main import (
     Square,
-    apply_size_scale,
     create_random_square,
     create_squares,
     update_square,
     update_squares,
     draw_square,
     draw_squares,
-    sync_square_count,
-    MAX_RENDER_SIZE,
-    MAX_SQUARE_COUNT,
-    MIN_SQUARE_COUNT,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     SQUARE_COUNT,
@@ -226,14 +216,6 @@ class TestUpdateSquare:
         # With 5% chance per frame over 200 frames, we should see at least some changes
         assert velocities_changed > 0
 
-    def test_speed_multiplier_affects_distance(self, monkeypatch):
-        """Test that speed multiplier changes travel distance in one update."""
-        monkeypatch.setattr(app.random, "random", lambda: 1.0)
-        square = Square(x=10, y=10, vx=4, vy=2, color=(255, 0, 0))
-        update_square(square, speed_multiplier=2.0)
-        assert square.x == 18
-        assert square.y == 14
-
 
 class TestUpdateSquares:
     """Tests for update_squares function."""
@@ -255,64 +237,6 @@ class TestUpdateSquares:
         """Test that empty list doesn't cause errors."""
         squares: list[Square] = []
         update_squares(squares)  # Should not raise
-
-    def test_collision_toggle_changes_behavior(self, monkeypatch):
-        """Test that enabling collisions changes interacting square velocities."""
-        monkeypatch.setattr(app.random, "random", lambda: 1.0)
-
-        no_collision = [
-            Square(x=100, y=120, vx=2, vy=0, color=(255, 0, 0), size=40),
-            Square(x=125, y=120, vx=-2, vy=0, color=(0, 255, 0), size=40),
-        ]
-        update_squares(no_collision, collisions_enabled=False)
-        assert no_collision[0].vx == 2
-        assert no_collision[1].vx == -2
-
-        with_collision = [
-            Square(x=100, y=120, vx=2, vy=0, color=(255, 0, 0), size=40),
-            Square(x=125, y=120, vx=-2, vy=0, color=(0, 255, 0), size=40),
-        ]
-        update_squares(with_collision, collisions_enabled=True)
-        assert with_collision[0].vx < 0
-        assert with_collision[1].vx > 0
-
-
-class TestConfigurationHelpers:
-    """Tests for runtime configuration helpers."""
-
-    def test_sync_square_count_increase_and_decrease(self):
-        """Test square count sync helper for both directions."""
-        squares = create_squares(4)
-        sync_square_count(squares, 9)
-        assert len(squares) == 9
-
-        sync_square_count(squares, 3)
-        assert len(squares) == 3
-
-    def test_sync_square_count_clamps_to_limits(self):
-        """Test target count clamping to configured min/max values."""
-        squares = create_squares(4)
-
-        sync_square_count(squares, -100)
-        assert len(squares) == MIN_SQUARE_COUNT
-
-        sync_square_count(squares, 1000)
-        assert len(squares) == MAX_SQUARE_COUNT
-
-    def test_apply_size_scale_respects_bounds(self):
-        """Test size scaling while preserving configured min/max render bounds."""
-        squares = [
-            Square(x=50, y=50, vx=1, vy=1, color=(255, 0, 0), size=24, base_size=24),
-            Square(x=120, y=120, vx=1, vy=1, color=(0, 255, 0), size=72, base_size=72),
-        ]
-
-        apply_size_scale(squares, 2.0)
-        assert 24 <= squares[0].size <= MAX_RENDER_SIZE
-        assert 24 <= squares[1].size <= MAX_RENDER_SIZE
-
-        apply_size_scale(squares, 0.1)
-        assert squares[0].size >= SQUARE_MIN_SIZE
-        assert squares[1].size >= SQUARE_MIN_SIZE
 
 
 class TestDrawSquare:
