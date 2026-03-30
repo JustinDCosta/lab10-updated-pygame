@@ -130,3 +130,8 @@ also make sure to run the test after to check if the code works.
 - **Changes Made**: Added variable square sizes, gradient background, glow/border/shine styling for blocks, and updated tests to validate variable-size bounds and improved pygame Rect mocking.
 - **Context and Reasons for Changes**: User requested visual and graphics enhancements with different block sizes while keeping behavior correct.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 14:28
+- **Prompt**: have it a clock and configuaration setting in window to change speed add more blocks, increase block sizes, option to make the blocks interactable(as in can have collisions between 2 or more blocks).

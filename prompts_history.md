@@ -26,3 +26,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 14:06
 - **Prompt**: Make the blocks different sizes and improve the ui and graphics.
 
+### 30-03-2026 14:28
+- **Prompt**: have it a clock and configuaration setting in window to change speed add more blocks, increase block sizes, option to make the blocks interactable(as in can have collisions between 2 or more blocks).
+
