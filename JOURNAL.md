@@ -103,3 +103,14 @@ also make sure to run the test after to check if the code works.
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 13:47
 - **Prompt**: Create a Readme.md file that clearly explains how to run the application and also about the function of the application. Be detailed.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 13:48
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: Create a Readme.md file that clearly explains how to run the application and also about the function of the application. Be detailed.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Added a detailed README.md with application purpose, architecture, setup, run commands, test commands, troubleshooting, and enhancement ideas.
+- **Context and Reasons for Changes**: User requested clear and detailed documentation for running and understanding the application.
+
