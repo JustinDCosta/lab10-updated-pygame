@@ -24,6 +24,8 @@ pygame_mock = MagicMock()
 pygame_mock.Rect = DummyRect
 sys.modules["pygame"] = pygame_mock
 
+import main as app
+
 from main import (
     Square,
     create_random_square,
@@ -199,15 +201,27 @@ class TestUpdateSquare:
         assert square.x > 200
         assert square.y > 200
 
-    def test_velocity_stays_constant_without_drift(self):
-        """Test that velocity remains constant when no boundary collisions occur."""
+    def test_velocity_changes_when_jitter_triggers(self, monkeypatch):
+        """Test that velocity changes when jitter condition is forced true."""
+        monkeypatch.setattr(app.random, "random", lambda: 0.0)
+        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.25)
+
         square = Square(x=200, y=200, vx=2.0, vy=1.0, color=(255, 0, 0))
-        for _ in range(50):
-            update_square(square)
-        assert square.vx == 2.0
-        assert square.vy == 1.0
-        assert square.x == 300.0
-        assert square.y == 250.0
+        update_square(square)
+
+        assert square.vx == 2.25
+        assert square.vy == 1.25
+
+    def test_velocity_respects_max_speed_on_jitter(self, monkeypatch):
+        """Test jitter velocity clamp against each square's max_speed."""
+        monkeypatch.setattr(app.random, "random", lambda: 0.0)
+        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 1.0)
+
+        square = Square(x=200, y=200, vx=5.8, vy=5.9, color=(255, 0, 0), max_speed=6.0)
+        update_square(square)
+
+        assert square.vx == 6.0
+        assert square.vy == 6.0
 
 
 class TestUpdateSquares:
@@ -300,17 +314,20 @@ class TestIntegration:
                 assert 0 <= square.x <= SCREEN_WIDTH - square.size
                 assert 0 <= square.y <= SCREEN_HEIGHT - square.size
 
-    def test_velocity_stays_constant_without_drift(self):
-        """Test that velocity stays constant over time without random drift."""
+    def test_velocity_can_change_over_time_with_jitter(self, monkeypatch):
+        """Test that velocity can evolve over time when jitter is applied."""
+        monkeypatch.setattr(app.random, "random", lambda: 0.0)
+        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.1)
+
         sqrt = Square(x=200, y=200, vx=1.5, vy=1.0, color=(255, 0, 0))
         velocities_seen = set()
         velocities_seen.add((sqrt.vx, sqrt.vy))
 
-        for _ in range(80):
+        for _ in range(10):
             update_square(sqrt)
             velocities_seen.add((sqrt.vx, sqrt.vy))
 
-        assert len(velocities_seen) == 1
+        assert len(velocities_seen) > 1
 
 
 if __name__ == "__main__":

@@ -201,3 +201,14 @@ update the code
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 14:57
 - **Prompt**: Jitter - Make each square change its direction randomly a little bit over time.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 14:59
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: Jitter - Make each square change its direction randomly a little bit over time.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Reintroduced subtle random jitter in update_square with velocity clamping to each square's max_speed, and updated tests to validate deterministic jitter behavior.
+- **Context and Reasons for Changes**: User requested small random direction changes over time to bring back jitter motion.
+

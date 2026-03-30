@@ -1,4 +1,4 @@
-"""Pygame app that renders 100 squares moving in straight lines with edge bounce."""
+"""Pygame app that renders 100 squares with subtle jitter and edge bounce."""
 
 from __future__ import annotations
 
@@ -23,6 +23,8 @@ SPEED_MAX: int = 4
 GLOBAL_MAX_SPEED: float = 6.0  # Defined global max speed
 COLOR_MIN: int = 50
 COLOR_MAX: int = 255
+JITTER_CHANCE: float = 0.05
+JITTER_DELTA: float = 0.25
 
 
 @dataclass
@@ -93,6 +95,13 @@ def update_square(square: Square) -> None:
     """Advance one square by one frame."""
     square.x += square.vx
     square.y += square.vy
+
+    if random.random() < JITTER_CHANCE:
+        square.vx += random.uniform(-JITTER_DELTA, JITTER_DELTA)
+        square.vy += random.uniform(-JITTER_DELTA, JITTER_DELTA)
+
+        square.vx = max(-square.max_speed, min(square.max_speed, square.vx))
+        square.vy = max(-square.max_speed, min(square.max_speed, square.vy))
 
     _apply_boundary(square)
 
