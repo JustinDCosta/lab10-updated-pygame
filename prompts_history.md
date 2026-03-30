@@ -32,3 +32,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 14:36
 - **Prompt**: revert back to original one without the clock and these features as i will manually add them myself.
 
+### 30-03-2026 14:43
+- **Prompt**: check my code and the changes i made. check it out with the tests and see if everything works out.
+
