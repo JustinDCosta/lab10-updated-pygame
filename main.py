@@ -1,8 +1,4 @@
-"""Stubbed pygame app: 10 squares moving randomly on a canvas.
-
-This file is intentionally scaffolded with TODOs so you can implement
-the behavior step by step.
-"""
+"""Pygame app that renders 10 squares moving with random drift and edge bounce."""
 
 from __future__ import annotations
 
@@ -11,28 +7,31 @@ from dataclasses import dataclass
 
 import pygame
 
-# Canvas settings
 SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
 BG_COLOR: tuple[int, int, int] = (20, 20, 30)
+FPS: int = 60
 
-# Square settings
 SQUARE_COUNT: int = 10
 SQUARE_SIZE: int = 30
 SQUARE_COLOR: tuple[int, int, int] = (70, 200, 255)
 SPEED_MIN: int = 1
 SPEED_MAX: int = 4
+COLOR_MIN: int = 50
+COLOR_MAX: int = 255
+DRIFT_CHANCE: float = 0.05
+DRIFT_DELTA: float = 0.5
 
 
 @dataclass
 class Square:
-    """Holds square position and velocity."""
+    """Square position, velocity, and render color."""
 
     x: float
     y: float
     vx: float
     vy: float
-    color: tuple[int, int, int]  # Added to support the color TODO below
+    color: tuple[int, int, int]
     size: int = SQUARE_SIZE
 
 
@@ -42,37 +41,20 @@ def create_random_square() -> Square:
     y = random.randint(0, SCREEN_HEIGHT - SQUARE_SIZE)
     vx = random.choice([-1, 1]) * random.randint(SPEED_MIN, SPEED_MAX)
     vy = random.choice([-1, 1]) * random.randint(SPEED_MIN, SPEED_MAX)
-    color = (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255))
+    color = (
+        random.randint(COLOR_MIN, COLOR_MAX),
+        random.randint(COLOR_MIN, COLOR_MAX),
+        random.randint(COLOR_MIN, COLOR_MAX),
+    )
     return Square(x=x, y=y, vx=vx, vy=vy, color=color)
 
 
 def create_squares(count: int) -> list[Square]:
-    """Create a list of squares.
-
-    TODO: Try replacing this loop with your own approach and compare readability.
-    """
-    squares: list[Square] = []
-    for _ in range(count):
-        squares.append(create_random_square())
-    return squares
+    """Create a list of random squares."""
+    return [create_random_square() for _ in range(count)]
 
 
-def update_square(square: Square) -> None:
-    """Update one square position.
-
-    TODO 1: Move by velocity.
-    TODO 2: Bounce when hitting screen edges.
-    TODO 3 (optional): Add slight random direction changes over time.
-    """
-    square.x += square.vx
-    square.y += square.vy
-
-    # Implementing TODO 3
-    if random.random() < 0.05:
-        square.vx += random.uniform(-0.5, 0.5)
-        square.vy += random.uniform(-0.5, 0.5)
-
-    # TODO: Improve edge handling (for example, clamp position before reversing).
+def _apply_boundary(square: Square) -> None:
     if square.x <= 0:
         square.x = 0
         square.vx *= -1
@@ -88,6 +70,18 @@ def update_square(square: Square) -> None:
         square.vy *= -1
 
 
+def update_square(square: Square) -> None:
+    """Advance one square by one frame."""
+    square.x += square.vx
+    square.y += square.vy
+
+    if random.random() < DRIFT_CHANCE:
+        square.vx += random.uniform(-DRIFT_DELTA, DRIFT_DELTA)
+        square.vy += random.uniform(-DRIFT_DELTA, DRIFT_DELTA)
+
+    _apply_boundary(square)
+
+
 def update_squares(squares: list[Square]) -> None:
     """Update all squares each frame."""
     for square in squares:
@@ -95,10 +89,7 @@ def update_squares(squares: list[Square]) -> None:
 
 
 def draw_square(screen: pygame.Surface, square: Square) -> None:
-    """Draw one square.
-
-    TODO: Change color per-square if you want more visual feedback.
-    """
+    """Draw one square."""
     rect = pygame.Rect(int(square.x), int(square.y), square.size, square.size)
     pygame.draw.rect(screen, square.color, rect)
 
@@ -113,7 +104,7 @@ def run() -> None:
     """Main game loop."""
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Random Moving Squares (Stub)")
+    pygame.display.set_caption("Random Moving Squares")
     clock = pygame.time.Clock()
 
     squares = create_squares(SQUARE_COUNT)
@@ -132,8 +123,7 @@ def run() -> None:
         draw_squares(screen, squares)
         pygame.display.flip()
 
-        # TODO: Experiment with FPS values and observe motion smoothness.
-        clock.tick(60)
+        clock.tick(FPS)
 
     pygame.quit()
 

@@ -86,3 +86,15 @@ help me implement this with stubs and todos in main.py
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 13:45
 - **Prompt**: clean up the code. Optimise it. and remove the comments such as todos and the stubs. also make sure to run the test after to check if the code works.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 13:46
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: clean up the code. Optimise it. and remove the comments such as todos and the stubs.
+also make sure to run the test after to check if the code works.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Refactored main.py to remove stub/TODO wording, extracted constants, simplified square creation, extracted boundary handling helper, and kept behavior-compatible movement/drift logic. Ran tests successfully.
+- **Context and Reasons for Changes**: User requested cleanup and optimization with post-change test verification.
+
