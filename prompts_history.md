@@ -35,3 +35,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 14:43
 - **Prompt**: check my code and the changes i made. check it out with the tests and see if everything works out.
 
+### 30-03-2026 14:47
+- **Prompt**: I dont want the jittering and want them to move straight update the code
+

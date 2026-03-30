@@ -167,3 +167,20 @@ also make sure to run the test after to check if the code works.
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 14:43
 - **Prompt**: check my code and the changes i made. check it out with the tests and see if everything works out.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 14:44
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: check my code and the changes i made.
+check it out with the tests and see if everything works out.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Reviewed current main.py changes (100 squares and per-square max_speed cap), executed test suite via pytest and direct test file execution, and performed an additional runtime sanity attempt.
+- **Context and Reasons for Changes**: User requested validation of recent code changes and verification via tests; no source code edits were made.
+
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 14:47
+- **Prompt**: I dont want the jittering and want them to move straight update the code
