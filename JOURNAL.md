@@ -196,3 +196,8 @@ update the code
 - **Changes Made**: Removed random velocity drift from update_square so blocks move in straight lines, and updated drift-related tests to assert constant velocity motion.
 - **Context and Reasons for Changes**: User requested smooth straight movement without jittering.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 14:57
+- **Prompt**: Jitter - Make each square change its direction randomly a little bit over time.

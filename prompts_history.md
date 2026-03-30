@@ -38,3 +38,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 14:47
 - **Prompt**: I dont want the jittering and want them to move straight update the code
 
+### 30-03-2026 14:57
+- **Prompt**: Jitter - Make each square change its direction randomly a little bit over time.
+
