@@ -9,12 +9,15 @@ import pygame
 
 SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
-BG_COLOR: tuple[int, int, int] = (20, 20, 30)
+BG_TOP_COLOR: tuple[int, int, int] = (18, 22, 38)
+BG_BOTTOM_COLOR: tuple[int, int, int] = (34, 48, 72)
 FPS: int = 60
 
 SQUARE_COUNT: int = 10
 SQUARE_SIZE: int = 30
-SQUARE_COLOR: tuple[int, int, int] = (70, 200, 255)
+SQUARE_MIN_SIZE: int = 18
+SQUARE_MAX_SIZE: int = 54
+SQUARE_BORDER_COLOR: tuple[int, int, int] = (240, 246, 255)
 SPEED_MIN: int = 1
 SPEED_MAX: int = 4
 COLOR_MIN: int = 50
@@ -37,8 +40,9 @@ class Square:
 
 def create_random_square() -> Square:
     """Create one square at a random position with random velocity."""
-    x = random.randint(0, SCREEN_WIDTH - SQUARE_SIZE)
-    y = random.randint(0, SCREEN_HEIGHT - SQUARE_SIZE)
+    size = random.randint(SQUARE_MIN_SIZE, SQUARE_MAX_SIZE)
+    x = random.randint(0, SCREEN_WIDTH - size)
+    y = random.randint(0, SCREEN_HEIGHT - size)
     vx = random.choice([-1, 1]) * random.randint(SPEED_MIN, SPEED_MAX)
     vy = random.choice([-1, 1]) * random.randint(SPEED_MIN, SPEED_MAX)
     color = (
@@ -46,7 +50,7 @@ def create_random_square() -> Square:
         random.randint(COLOR_MIN, COLOR_MAX),
         random.randint(COLOR_MIN, COLOR_MAX),
     )
-    return Square(x=x, y=y, vx=vx, vy=vy, color=color)
+    return Square(x=x, y=y, vx=vx, vy=vy, color=color, size=size)
 
 
 def create_squares(count: int) -> list[Square]:
@@ -88,10 +92,45 @@ def update_squares(squares: list[Square]) -> None:
         update_square(square)
 
 
+def draw_background(screen: pygame.Surface) -> None:
+    """Render a vertical color gradient background."""
+    for y in range(SCREEN_HEIGHT):
+        ratio = y / max(SCREEN_HEIGHT - 1, 1)
+        color = (
+            int(BG_TOP_COLOR[0] + (BG_BOTTOM_COLOR[0] - BG_TOP_COLOR[0]) * ratio),
+            int(BG_TOP_COLOR[1] + (BG_BOTTOM_COLOR[1] - BG_TOP_COLOR[1]) * ratio),
+            int(BG_TOP_COLOR[2] + (BG_BOTTOM_COLOR[2] - BG_TOP_COLOR[2]) * ratio),
+        )
+        pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))
+
+
 def draw_square(screen: pygame.Surface, square: Square) -> None:
     """Draw one square."""
     rect = pygame.Rect(int(square.x), int(square.y), square.size, square.size)
-    pygame.draw.rect(screen, square.color, rect)
+    glow_rect = rect.inflate(8, 8)
+    glow_color = (
+        min(square.color[0] + 45, 255),
+        min(square.color[1] + 45, 255),
+        min(square.color[2] + 45, 255),
+    )
+
+    pygame.draw.rect(screen, glow_color, glow_rect, border_radius=max(square.size // 4, 4))
+    pygame.draw.rect(screen, square.color, rect, border_radius=max(square.size // 5, 3))
+    pygame.draw.rect(
+        screen,
+        SQUARE_BORDER_COLOR,
+        rect,
+        width=max(square.size // 12, 1),
+        border_radius=max(square.size // 5, 3),
+    )
+
+    shine = pygame.Rect(rect.x + rect.w // 6, rect.y + rect.h // 8, rect.w // 3, max(rect.h // 8, 2))
+    pygame.draw.rect(
+        screen,
+        (255, 255, 255),
+        shine,
+        border_radius=max(square.size // 10, 2),
+    )
 
 
 def draw_squares(screen: pygame.Surface, squares: list[Square]) -> None:
@@ -115,11 +154,8 @@ def run() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
-        # Update
         update_squares(squares)
-
-        # Draw
-        screen.fill(BG_COLOR)
+        draw_background(screen)
         draw_squares(screen, squares)
         pygame.display.flip()
 

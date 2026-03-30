@@ -1,13 +1,28 @@
 """Test suite for main.py pygame square movement application."""
 
 import pytest
-from unittest.mock import Mock, patch
-import random
+from unittest.mock import Mock
 import sys
 from unittest.mock import MagicMock
 
+
+class DummyRect:
+    """Minimal Rect replacement for draw-path unit tests."""
+
+    def __init__(self, x: int, y: int, w: int, h: int):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def inflate(self, dx: int, dy: int) -> "DummyRect":
+        return DummyRect(self.x - dx // 2, self.y - dy // 2, self.w + dx, self.h + dy)
+
+
 # Mock pygame before importing main
-sys.modules['pygame'] = MagicMock()
+pygame_mock = MagicMock()
+pygame_mock.Rect = DummyRect
+sys.modules["pygame"] = pygame_mock
 
 from main import (
     Square,
@@ -21,6 +36,8 @@ from main import (
     SCREEN_HEIGHT,
     SQUARE_COUNT,
     SQUARE_SIZE,
+    SQUARE_MIN_SIZE,
+    SQUARE_MAX_SIZE,
     SPEED_MIN,
     SPEED_MAX,
 )
@@ -57,8 +74,14 @@ class TestCreateRandomSquare:
         """Test that random square position is within screen bounds."""
         for _ in range(10):
             square = create_random_square()
-            assert 0 <= square.x <= SCREEN_WIDTH - SQUARE_SIZE
-            assert 0 <= square.y <= SCREEN_HEIGHT - SQUARE_SIZE
+            assert 0 <= square.x <= SCREEN_WIDTH - square.size
+            assert 0 <= square.y <= SCREEN_HEIGHT - square.size
+
+    def test_size_in_range(self):
+        """Test that random square sizes are within configured limits."""
+        for _ in range(10):
+            square = create_random_square()
+            assert SQUARE_MIN_SIZE <= square.size <= SQUARE_MAX_SIZE
 
     def test_velocity_in_range(self):
         """Test that velocity magnitude is within speed range."""
@@ -134,15 +157,17 @@ class TestUpdateSquare:
 
     def test_right_edge_collision(self):
         """Test bounce when hitting right edge."""
+        size = 40
         square = Square(
-            x=SCREEN_WIDTH - SQUARE_SIZE - 5,
+            x=SCREEN_WIDTH - size - 5,
             y=100,
             vx=10,
             vy=0,
             color=(255, 0, 0),
+            size=size,
         )
         update_square(square)
-        assert square.x == SCREEN_WIDTH - SQUARE_SIZE  # Clamped to edge
+        assert square.x == SCREEN_WIDTH - size  # Clamped to edge
         assert square.vx < 0  # Velocity reversed
 
     def test_top_edge_collision(self):
@@ -154,11 +179,17 @@ class TestUpdateSquare:
 
     def test_bottom_edge_collision(self):
         """Test bounce when hitting bottom edge."""
+        size = 40
         square = Square(
-            x=100, y=SCREEN_HEIGHT - SQUARE_SIZE - 5, vx=0, vy=10, color=(255, 0, 0)
+            x=100,
+            y=SCREEN_HEIGHT - size - 5,
+            vx=0,
+            vy=10,
+            color=(255, 0, 0),
+            size=size,
         )
         update_square(square)
-        assert square.y == SCREEN_HEIGHT - SQUARE_SIZE  # Clamped to edge
+        assert square.y == SCREEN_HEIGHT - size  # Clamped to edge
         assert square.vy < 0  # Velocity reversed
 
     def test_no_collision_inside_bounds(self):
@@ -273,8 +304,8 @@ class TestIntegration:
         for _ in range(100):  # Simulate 100 frames
             update_squares(squares)
             for square in squares:
-                assert 0 <= square.x <= SCREEN_WIDTH - SQUARE_SIZE
-                assert 0 <= square.y <= SCREEN_HEIGHT - SQUARE_SIZE
+                assert 0 <= square.x <= SCREEN_WIDTH - square.size
+                assert 0 <= square.y <= SCREEN_HEIGHT - square.size
 
     def test_velocity_changes_under_random_drift(self):
         """Test that velocity can drift randomly over time."""
