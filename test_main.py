@@ -195,26 +195,19 @@ class TestUpdateSquare:
     def test_no_collision_inside_bounds(self):
         """Test that square moves normally when not at edges."""
         square = Square(x=200, y=200, vx=3, vy=4, color=(255, 0, 0))
-        original_vx = square.vx
-        original_vy = square.vy
         update_square(square)
-        # Velocity might change due to random drift, but position should move
         assert square.x > 200
         assert square.y > 200
 
-    def test_random_drift_possibility(self):
-        """Test that random direction changes can occur (probabilistic test)."""
-        velocities_changed = 0
-        for _ in range(200):  # Run multiple times to catch random drift
-            square = Square(x=200, y=200, vx=2.0, vy=2.0, color=(255, 0, 0))
-            original_vx = square.vx
-            original_vy = square.vy
+    def test_velocity_stays_constant_without_drift(self):
+        """Test that velocity remains constant when no boundary collisions occur."""
+        square = Square(x=200, y=200, vx=2.0, vy=1.0, color=(255, 0, 0))
+        for _ in range(50):
             update_square(square)
-            # Check if velocity was changed by drift (within tolerance for float precision)
-            if abs(square.vx - original_vx) > 0.01 or abs(square.vy - original_vy) > 0.01:
-                velocities_changed += 1
-        # With 5% chance per frame over 200 frames, we should see at least some changes
-        assert velocities_changed > 0
+        assert square.vx == 2.0
+        assert square.vy == 1.0
+        assert square.x == 300.0
+        assert square.y == 250.0
 
 
 class TestUpdateSquares:
@@ -307,18 +300,17 @@ class TestIntegration:
                 assert 0 <= square.x <= SCREEN_WIDTH - square.size
                 assert 0 <= square.y <= SCREEN_HEIGHT - square.size
 
-    def test_velocity_changes_under_random_drift(self):
-        """Test that velocity can drift randomly over time."""
-        sqrt = Square(x=200, y=200, vx=2.0, vy=2.0, color=(255, 0, 0))
+    def test_velocity_stays_constant_without_drift(self):
+        """Test that velocity stays constant over time without random drift."""
+        sqrt = Square(x=200, y=200, vx=1.5, vy=1.0, color=(255, 0, 0))
         velocities_seen = set()
         velocities_seen.add((sqrt.vx, sqrt.vy))
 
-        for _ in range(100):
+        for _ in range(80):
             update_square(sqrt)
             velocities_seen.add((sqrt.vx, sqrt.vy))
 
-        # Should see more than one unique velocity pair due to random drift
-        assert len(velocities_seen) > 1
+        assert len(velocities_seen) == 1
 
 
 if __name__ == "__main__":

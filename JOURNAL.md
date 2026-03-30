@@ -184,3 +184,15 @@ check it out with the tests and see if everything works out.
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 14:47
 - **Prompt**: I dont want the jittering and want them to move straight update the code
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 14:48
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: I dont want the jittering and want them to move straight
+update the code
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Removed random velocity drift from update_square so blocks move in straight lines, and updated drift-related tests to assert constant velocity motion.
+- **Context and Reasons for Changes**: User requested smooth straight movement without jittering.
+
