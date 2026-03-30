@@ -53,3 +53,15 @@ and then do a initial commit with the message: "Initial Commit"
 - **Hook Version**: 1.02
 - **Date**: 30-03-2026 13:08
 - **Prompt**: "a simple python application that will displays 10 squares moving around randomly on the canvas" help me implement this with stubs and todos in main.py
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 30-03-2026 13:10
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: "a simple python application that will displays 10 squares moving around randomly on the canvas"
+help me implement this with stubs and todos in main.py
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Added a runnable pygame scaffold in main.py with structured stub functions and TODOs for square movement behavior.
+- **Context and Reasons for Changes**: User requested implementation help via starter code rather than a fully finished solution.
+
