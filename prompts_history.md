@@ -23,3 +23,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 13:47
 - **Prompt**: Create a Readme.md file that clearly explains how to run the application and also about the function of the application. Be detailed.
 
+### 30-03-2026 14:06
+- **Prompt**: Make the blocks different sizes and improve the ui and graphics.
+

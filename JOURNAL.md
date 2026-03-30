@@ -114,3 +114,8 @@ also make sure to run the test after to check if the code works.
 - **Changes Made**: Added a detailed README.md with application purpose, architecture, setup, run commands, test commands, troubleshooting, and enhancement ideas.
 - **Context and Reasons for Changes**: User requested clear and detailed documentation for running and understanding the application.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 14:06
+- **Prompt**: Make the blocks different sizes and improve the ui and graphics.
