@@ -20,3 +20,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 13:45
 - **Prompt**: clean up the code. Optimise it. and remove the comments such as todos and the stubs. also make sure to run the test after to check if the code works.
 
+### 30-03-2026 13:47
+- **Prompt**: Create a Readme.md file that clearly explains how to run the application and also about the function of the application. Be detailed.
+

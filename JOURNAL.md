@@ -98,3 +98,8 @@ also make sure to run the test after to check if the code works.
 - **Changes Made**: Refactored main.py to remove stub/TODO wording, extracted constants, simplified square creation, extracted boundary handling helper, and kept behavior-compatible movement/drift logic. Ran tests successfully.
 - **Context and Reasons for Changes**: User requested cleanup and optimization with post-change test verification.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 30-03-2026 13:47
+- **Prompt**: Create a Readme.md file that clearly explains how to run the application and also about the function of the application. Be detailed.
