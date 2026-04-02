@@ -44,3 +44,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 30-03-2026 15:21
 - **Prompt**: I have updated the report.md file. commit it and push it to github
 
+### 02-04-2026 02:15
+- **Prompt**: You are a professional code reviewer. I have made a few changes on the code to make the app more perfect. I would like you to check them and see if it is correct. I have also added the comments on what they do. Fix any grammar errors in the comments(and simplify them further if it sounds too complicated)(also fix all the other comments to be further simplified and understandable, even for basic level programmars), and also on the Report.md and only fix the grammar errors. do not change anything else, especially my code. If something is wrong with my version, inform me first.
+
