@@ -251,3 +251,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 02-04-2026 02:20
 - **Prompt**: It is because the tests are from the previous version and should not work with the newer logic. I would like you to update the tests accordingly.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 02-04-2026 02:31
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: It is because the tests are from the previous version and should not work with the newer logic. I would like you to update the tests accordingly.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Updated test_main.py for dt-based update functions and rotation-based jitter behavior, added deterministic anti-flake fixture, and validated both pytest and direct test execution.
+- **Context and Reasons for Changes**: User confirmed API/test mismatch was expected and requested test updates to match the new movement logic.
+

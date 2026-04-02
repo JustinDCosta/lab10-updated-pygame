@@ -6,6 +6,7 @@ import random
 from dataclasses import dataclass
 
 import pygame
+import math
 
 SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
@@ -13,18 +14,17 @@ BG_TOP_COLOR: tuple[int, int, int] = (18, 22, 38)
 BG_BOTTOM_COLOR: tuple[int, int, int] = (34, 48, 72)
 FPS: int = 60
 
-SQUARE_COUNT: int = 100  # Increased to 100
+SQUARE_COUNT: int = 100  # Number of squares to draw
 SQUARE_SIZE: int = 30
-SQUARE_MIN_SIZE: int = 18  # Global min size
-SQUARE_MAX_SIZE: int = 54  # Global max size
+SQUARE_MIN_SIZE: int = 18  # Smallest square size
+SQUARE_MAX_SIZE: int = 54  # Largest square size
 SQUARE_BORDER_COLOR: tuple[int, int, int] = (240, 246, 255)
-SPEED_MIN: int = 1
-SPEED_MAX: int = 4
-GLOBAL_MAX_SPEED: float = 6.0  # Defined global max speed
+SPEED_MIN: int = 60
+SPEED_MAX: int = 240
+GLOBAL_MAX_SPEED: float = 360.0
 COLOR_MIN: int = 50
 COLOR_MAX: int = 255
 JITTER_CHANCE: float = 0.05
-JITTER_DELTA: float = 0.25
 
 
 @dataclass
@@ -37,25 +37,25 @@ class Square:
     vy: float
     color: tuple[int, int, int]
     size: int = SQUARE_SIZE
-    max_speed: float = GLOBAL_MAX_SPEED  # Added max speed attribute
+    max_speed: float = GLOBAL_MAX_SPEED  # Maximum speed for this square
 
 
 def create_random_square() -> Square:
     """Create one square at a random position with random velocity."""
     size = random.randint(SQUARE_MIN_SIZE, SQUARE_MAX_SIZE)
 
-    # Calculate max speed: the bigger the size, the slower the max speed.
-    # We use a 0-1 scale based on the size limits. 1.0 means it's the minimum size.
+    # Larger squares move slower.
+    # size_factor is in the 0-1 range, where 1 means the smallest square.
     size_factor = (SQUARE_MAX_SIZE - size) / max(1, (SQUARE_MAX_SIZE - SQUARE_MIN_SIZE))
 
-    # Scale speed between a minimum floor (1.0) and the GLOBAL_MAX_SPEED
-    max_speed = 1.0 + (GLOBAL_MAX_SPEED - 1.0) * size_factor
-    max_speed = min(max_speed, GLOBAL_MAX_SPEED)  # Ensure it never exceeds global scale
+    # Scale speed from 60.0 up to GLOBAL_MAX_SPEED.
+    max_speed = 60.0 + (GLOBAL_MAX_SPEED - 60.0) * size_factor
+    max_speed = min(max_speed, GLOBAL_MAX_SPEED)  # Keep within the global limit
 
     x = random.randint(0, SCREEN_WIDTH - size)
     y = random.randint(0, SCREEN_HEIGHT - size)
 
-    # Cap the initial starting speed to its personal max_speed
+    # Limit starting speed to this square's max speed.
     start_speed_x = min(random.randint(SPEED_MIN, SPEED_MAX), max_speed)
     start_speed_y = min(random.randint(SPEED_MIN, SPEED_MAX), max_speed)
 
@@ -91,25 +91,28 @@ def _apply_boundary(square: Square) -> None:
         square.vy *= -1
 
 
-def update_square(square: Square) -> None:
+def update_square(square: Square, dt: float) -> None:
     """Advance one square by one frame."""
-    square.x += square.vx
-    square.y += square.vy
+    square.x += square.vx * dt  # Use delta time for frame-independent movement
+    square.y += square.vy * dt
 
+    # Rotate velocity by a small random angle to create gentle jitter.
     if random.random() < JITTER_CHANCE:
-        square.vx += random.uniform(-JITTER_DELTA, JITTER_DELTA)
-        square.vy += random.uniform(-JITTER_DELTA, JITTER_DELTA)
-
-        square.vx = max(-square.max_speed, min(square.max_speed, square.vx))
-        square.vy = max(-square.max_speed, min(square.max_speed, square.vy))
+        theta = random.uniform(-0.1, 0.1)  # Small random angle in radians
+        
+        new_vx = square.vx * math.cos(theta) - square.vy * math.sin(theta)
+        new_vy = square.vx * math.sin(theta) + square.vy * math.cos(theta)
+        
+        square.vx = new_vx
+        square.vy = new_vy
 
     _apply_boundary(square)
 
 
-def update_squares(squares: list[Square]) -> None:
+def update_squares(squares: list[Square], dt: float) -> None:
     """Update all squares each frame."""
     for square in squares:
-        update_square(square)
+        update_square(square, dt)
 
 
 def draw_background(screen: pygame.Surface) -> None:
@@ -174,12 +177,12 @@ def run() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
-        update_squares(squares)
+        dt = clock.tick(FPS) / 1000.0
+
+        update_squares(squares, dt)
         draw_background(screen)
         draw_squares(screen, squares)
         pygame.display.flip()
-
-        clock.tick(FPS)
 
     pygame.quit()
 

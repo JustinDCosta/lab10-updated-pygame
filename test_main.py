@@ -1,5 +1,6 @@
 """Test suite for main.py pygame square movement application."""
 
+import math
 import pytest
 from unittest.mock import Mock
 import sys
@@ -43,6 +44,12 @@ from main import (
     SPEED_MIN,
     SPEED_MAX,
 )
+
+
+@pytest.fixture(autouse=True)
+def disable_jitter_by_default(monkeypatch):
+    """Keep tests deterministic unless a specific test enables jitter."""
+    monkeypatch.setattr(app.random, "random", lambda: 1.0)
 
 
 class TestSquareDataModel:
@@ -146,14 +153,14 @@ class TestUpdateSquare:
         square = Square(x=100, y=100, vx=5, vy=-3, color=(255, 0, 0))
         original_x = square.x
         original_y = square.y
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.x == original_x + 5
         assert square.y == original_y - 3
 
     def test_left_edge_collision(self):
         """Test bounce when hitting left edge."""
         square = Square(x=5, y=100, vx=-10, vy=0, color=(255, 0, 0))
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.x == 0  # Clamped to edge
         assert square.vx > 0  # Velocity reversed
 
@@ -168,14 +175,14 @@ class TestUpdateSquare:
             color=(255, 0, 0),
             size=size,
         )
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.x == SCREEN_WIDTH - size  # Clamped to edge
         assert square.vx < 0  # Velocity reversed
 
     def test_top_edge_collision(self):
         """Test bounce when hitting top edge."""
         square = Square(x=100, y=5, vx=0, vy=-10, color=(255, 0, 0))
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.y == 0  # Clamped to edge
         assert square.vy > 0  # Velocity reversed
 
@@ -190,14 +197,14 @@ class TestUpdateSquare:
             color=(255, 0, 0),
             size=size,
         )
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.y == SCREEN_HEIGHT - size  # Clamped to edge
         assert square.vy < 0  # Velocity reversed
 
     def test_no_collision_inside_bounds(self):
         """Test that square moves normally when not at edges."""
         square = Square(x=200, y=200, vx=3, vy=4, color=(255, 0, 0))
-        update_square(square)
+        update_square(square, dt=1.0)
         assert square.x > 200
         assert square.y > 200
 
@@ -207,21 +214,24 @@ class TestUpdateSquare:
         monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.25)
 
         square = Square(x=200, y=200, vx=2.0, vy=1.0, color=(255, 0, 0))
-        update_square(square)
+        update_square(square, dt=1.0)
 
-        assert square.vx == 2.25
-        assert square.vy == 1.25
+        expected_vx = 2.0 * math.cos(0.25) - 1.0 * math.sin(0.25)
+        expected_vy = 2.0 * math.sin(0.25) + 1.0 * math.cos(0.25)
+        assert square.vx == pytest.approx(expected_vx)
+        assert square.vy == pytest.approx(expected_vy)
 
-    def test_velocity_respects_max_speed_on_jitter(self, monkeypatch):
-        """Test jitter velocity clamp against each square's max_speed."""
+    def test_jitter_rotation_preserves_speed_magnitude(self, monkeypatch):
+        """Test that jitter rotates velocity while preserving speed magnitude."""
         monkeypatch.setattr(app.random, "random", lambda: 0.0)
-        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 1.0)
+        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.1)
 
         square = Square(x=200, y=200, vx=5.8, vy=5.9, color=(255, 0, 0), max_speed=6.0)
-        update_square(square)
+        before_speed = math.hypot(square.vx, square.vy)
+        update_square(square, dt=1.0)
+        after_speed = math.hypot(square.vx, square.vy)
 
-        assert square.vx == 6.0
-        assert square.vy == 6.0
+        assert after_speed == pytest.approx(before_speed, rel=1e-6)
 
 
 class TestUpdateSquares:
@@ -234,7 +244,7 @@ class TestUpdateSquares:
             Square(x=200, y=200, vx=3, vy=3, color=(0, 255, 0)),
             Square(x=300, y=300, vx=2, vy=2, color=(0, 0, 255)),
         ]
-        update_squares(squares)
+        update_squares(squares, dt=1.0)
         # Each square should have moved by its velocity
         assert squares[0].x > 100
         assert squares[1].x > 200
@@ -243,7 +253,7 @@ class TestUpdateSquares:
     def test_empty_list_handled(self):
         """Test that empty list doesn't cause errors."""
         squares: list[Square] = []
-        update_squares(squares)  # Should not raise
+        update_squares(squares, dt=1.0)  # Should not raise
 
 
 class TestDrawSquare:
@@ -299,7 +309,7 @@ class TestIntegration:
         squares = create_squares(5)
         initial_positions = [(s.x, s.y) for s in squares]
 
-        update_squares(squares)
+        update_squares(squares, dt=1 / 60)
 
         final_positions = [(s.x, s.y) for s in squares]
         # At least some squares should have moved
@@ -309,7 +319,7 @@ class TestIntegration:
         """Test that squares remain in bounds after update."""
         squares = create_squares(10)
         for _ in range(100):  # Simulate 100 frames
-            update_squares(squares)
+            update_squares(squares, dt=1 / 60)
             for square in squares:
                 assert 0 <= square.x <= SCREEN_WIDTH - square.size
                 assert 0 <= square.y <= SCREEN_HEIGHT - square.size
@@ -324,7 +334,7 @@ class TestIntegration:
         velocities_seen.add((sqrt.vx, sqrt.vy))
 
         for _ in range(10):
-            update_square(sqrt)
+            update_square(sqrt, dt=1 / 60)
             velocities_seen.add((sqrt.vx, sqrt.vy))
 
         assert len(velocities_seen) > 1
