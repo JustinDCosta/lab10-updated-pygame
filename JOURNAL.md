@@ -267,3 +267,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 02-04-2026 02:40
 - **Prompt**: Now that everything works, update any other file, especially the README.md for the latest changes that were made, especially about the newer logic.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 02-04-2026 03:06
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: Now that everything works, update any other file, especially the README.md for the latest changes that were made, especially about the newer logic.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Rewrote README.md to match current dt-based movement, 100-square setup, size-speed scaling, trigonometric jitter, updated function signatures, and current test coverage. Verified tests still pass.
+- **Context and Reasons for Changes**: User requested documentation updates for the latest app logic and behavior.
+

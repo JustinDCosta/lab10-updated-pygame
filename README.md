@@ -1,84 +1,102 @@
 # Random Moving Squares (Pygame)
 
-## Application Purpose
-This project is a simple real-time graphics simulation built with Pygame. The application opens a window and displays 10 colored squares moving continuously on a 2D canvas.
+## Overview
+This project is a real-time Pygame simulation where 100 squares move around an 800x600 canvas.
 
-The project is useful for learning:
-- Basic game loop structure
-- Object movement using velocity vectors
-- Boundary collision and bounce behavior
-- Controlled randomness for motion variation
-- Organizing animation logic into small testable functions
+Each square has:
+- Random position
+- Random size
+- Random color
+- Speed tied to size
+- Subtle directional jitter over time
 
-## What the Application Does
-When you run the app, it:
-- Creates an 800x600 canvas.
-- Spawns 10 squares at random positions.
-- Assigns each square a random velocity and random color.
-- Updates each square every frame.
-- Makes squares bounce when they touch window edges.
-- Adds slight random velocity drift over time to avoid predictable motion.
-- Renders at 60 FPS for smooth animation.
+The app is useful for learning game-loop structure, frame-independent updates, and simple motion modeling.
 
-## Core Behavior and Logic
-The app is implemented in [main.py](main.py).
+## Latest Logic (Current Version)
+The current implementation is in [main.py](main.py).
 
-Key constants:
+Main updates in the latest version:
+- Uses delta time (`dt`) for frame-independent movement.
+- Uses 100 squares by default (`SQUARE_COUNT = 100`).
+- Ties max speed to square size (smaller squares can move faster).
+- Uses trigonometric velocity rotation for jitter (instead of additive drift).
+- Keeps edge bounce behavior and gradient background rendering.
+
+### Movement Model
+Per frame:
+- Position update:
+  - `x += vx * dt`
+  - `y += vy * dt`
+- Jitter chance:
+  - With probability `JITTER_CHANCE`, velocity is rotated by a small random angle.
+- Boundary behavior:
+  - Squares bounce when touching screen edges.
+
+### Jitter Model
+Jitter uses a small angle `theta` (in radians) and rotates the velocity vector:
+
+$$
+v_x' = v_x \cos(\theta) - v_y \sin(\theta)
+$$
+
+$$
+v_y' = v_x \sin(\theta) + v_y \cos(\theta)
+$$
+
+This changes direction smoothly while preserving speed magnitude.
+
+## Key Constants
 - `SCREEN_WIDTH`, `SCREEN_HEIGHT`: canvas size.
+- `FPS`: target frame rate.
 - `SQUARE_COUNT`: number of animated squares.
-- `SPEED_MIN`, `SPEED_MAX`: initial velocity range.
-- `DRIFT_CHANCE`: probability of random drift each frame.
-- `DRIFT_DELTA`: max amount of drift added to velocity.
-- `FPS`: target frames per second.
+- `SQUARE_MIN_SIZE`, `SQUARE_MAX_SIZE`: random size range.
+- `SPEED_MIN`, `SPEED_MAX`: initial speed range.
+- `GLOBAL_MAX_SPEED`: upper speed cap used by size-based scaling.
+- `JITTER_CHANCE`: probability of jitter per frame.
 
-Main functions:
+## Core Functions
 - `create_random_square()`:
-  - Creates one square with random position, velocity, and color.
+  - Creates one square with random size, color, and size-scaled max speed.
 - `create_squares(count)`:
   - Creates a list of squares.
-- `update_square(square)`:
-  - Moves a square based on velocity.
-  - Applies occasional random drift.
-  - Applies boundary bounce logic.
-- `update_squares(squares)`:
-  - Updates all squares per frame.
+- `update_square(square, dt)`:
+  - Advances one square using delta time and optional jitter rotation.
+- `update_squares(squares, dt)`:
+  - Updates all squares in one frame.
+- `_apply_boundary(square)`:
+  - Applies edge-bounce logic.
+- `draw_background(screen)`:
+  - Draws the gradient background.
 - `draw_square(screen, square)`:
-  - Draws one square.
+  - Draws one styled square.
 - `draw_squares(screen, squares)`:
   - Draws all squares.
 - `run()`:
-  - Initializes Pygame and executes the game loop.
+  - Runs the app loop and computes `dt` each frame.
 
 ## Project Structure
-- [main.py](main.py): application logic and game loop.
-- [test_main.py](test_main.py): automated tests for behavior and integration.
-- [REPORT.md](REPORT.md): lab/project report content.
-- [JOURNAL.md](JOURNAL.md): interaction and change history.
+- [main.py](main.py): application logic and rendering.
+- [test_main.py](test_main.py): automated test suite.
+- [REPORT.md](REPORT.md): project report.
+- [JOURNAL.md](JOURNAL.md): interaction/change log.
 
 ## Requirements
-- Python 3.10+ (project currently uses a virtual environment)
+- Python 3.10+
 - Pygame
-- Pytest (for running tests)
+- Pytest
 
-## Setup Instructions
-The project already contains a virtual environment folder [.venv](.venv), but you can also create a fresh one.
+## Setup
+The repository already contains [.venv](.venv), but you can create your own if needed.
 
-### Option A: Use existing virtual environment
-On Windows PowerShell:
+Use existing environment (PowerShell):
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-Install dependencies (if needed):
-
-```powershell
 python -m pip install --upgrade pip
 python -m pip install pygame pytest
 ```
 
-### Option B: Create a new virtual environment
-On Windows PowerShell:
+Create new environment (PowerShell):
 
 ```powershell
 python -m venv .venv
@@ -87,76 +105,63 @@ python -m pip install --upgrade pip
 python -m pip install pygame pytest
 ```
 
-## How To Run the Application
-From the project root:
+## Run the App
+From project root:
 
 ```powershell
 python main.py
 ```
 
 Expected result:
-- A window titled "Random Moving Squares" appears.
-- 10 squares move continuously, bounce at boundaries, and drift slightly over time.
+- A window titled "Random Moving Squares"
+- 100 moving squares
+- Smooth movement from `dt`
+- Subtle direction jitter over time
+- Edge bounce and gradient background
 
-To stop the app:
-- Close the window using the window close button.
-
-## How To Run Tests
-Recommended command:
+## Run Tests
+Recommended:
 
 ```powershell
 python -m pytest -q
 ```
 
-Verbose output:
+Verbose:
 
 ```powershell
 python -m pytest -v
 ```
 
-Current test scope in [test_main.py](test_main.py):
-- Data model validation
-- Random square creation constraints
-- Edge collision correctness
-- Multi-square update behavior
-- Draw-path execution
-- Integration checks over repeated updates
+Direct file execution:
+
+```powershell
+python test_main.py
+```
+
+Current test coverage in [test_main.py](test_main.py):
+- Square creation and bounds
+- Size and speed constraints
+- Boundary collisions
+- Jitter behavior
+- `dt`-based movement updates
+- Rendering path safety with pygame mocks
+- Integration behavior over multiple frames
 
 ## Troubleshooting
 ### `ModuleNotFoundError: No module named 'pygame'`
-Cause:
-- Pygame is not installed in the active environment.
-
-Fix:
+Install pygame in the active environment:
 
 ```powershell
 python -m pip install pygame
 ```
 
-### Tests fail because wrong Python interpreter is used
-Cause:
-- Command runs outside the project virtual environment.
-
-Fix:
-- Activate `.venv` first.
-- Or run with explicit interpreter path:
+### Wrong interpreter / environment
+Run tests and app with the venv interpreter directly:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe main.py
 ```
 
-### App window opens and closes immediately
-Cause:
-- Running from an environment that exits instantly after launch or script errors before loop.
-
-Fix:
-- Run from terminal in project root.
-- Check terminal output for traceback.
-
-## Notes for Further Enhancement
-You can extend this project by adding:
-- Square-to-square collision logic
-- Per-square speed limits
-- Keyboard controls (pause/resume, reset)
-- FPS and object count overlays
-- User-configurable settings file
+### Tests fail after logic changes
+If you change function signatures or motion logic, update [test_main.py](test_main.py) so tests match the new API and behavior.
