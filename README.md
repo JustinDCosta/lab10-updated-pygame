@@ -1,39 +1,43 @@
-# Random Moving Squares (Pygame)
+# Hierarchical Magnetic Circles (Pygame)
 
 ## Overview
-This project is a real-time Pygame simulation where 100 squares move around an 800x600 canvas.
+This project is a real-time Pygame simulation where circles move across an 800x600 canvas, jitter slightly over time, and repel each other with size-aware behavior.
 
-Each square has:
-- Random position
-- Random size
-- Random color
-- Speed tied to size
-- Subtle directional jitter over time
+Key behavior:
+- Random spawn position, radius, color, and starting velocity.
+- Frame-independent movement using delta time.
+- Magnetic repel force inside a configurable radius.
+- Size hierarchy:
+  - Smaller circles react more strongly to larger circles.
+  - Equal-size circles repel each other symmetrically.
+- Iterative overlap stabilization to reduce circle penetration.
+- Boundary bounce at all screen edges.
 
-The app is useful for learning game-loop structure, frame-independent updates, and simple motion modeling.
+## Current Configuration
+Main settings are defined in [main.py](main.py):
 
-## Latest Logic (Current Version)
-The current implementation is in [main.py](main.py).
+- `SCREEN_WIDTH = 800`
+- `SCREEN_HEIGHT = 600`
+- `FPS = 60`
+- `CIRCLE_COUNT = 30`
+- `CIRCLE_MIN_RADIUS = 8`
+- `CIRCLE_MAX_RADIUS = 25`
+- `SPEED_MIN = 15`
+- `SPEED_MAX = 40`
+- `GLOBAL_MAX_SPEED = 180.0`
+- `MAGNETIC_RADIUS = 180.0`
+- `MAGNETIC_FORCE = 800.0`
+- `OVERLAP_SOLVER_PASSES = 8`
 
-Main updates in the latest version:
-- Uses delta time (`dt`) for frame-independent movement.
-- Uses 100 squares by default (`SQUARE_COUNT = 100`).
-- Ties max speed to square size (smaller squares can move faster).
-- Uses trigonometric velocity rotation for jitter (instead of additive drift).
-- Keeps edge bounce behavior and gradient background rendering.
+## Motion and Repel Model
+For each frame:
+1. Stabilize existing overlap with iterative separation.
+2. Apply magnetic repel acceleration to each circle.
+3. Move circles with `x += vx * dt` and `y += vy * dt`.
+4. Apply jitter by rotating velocity with a small random angle.
+5. Stabilize positions again and enforce screen bounds.
 
-### Movement Model
-Per frame:
-- Position update:
-  - `x += vx * dt`
-  - `y += vy * dt`
-- Jitter chance:
-  - With probability `JITTER_CHANCE`, velocity is rotated by a small random angle.
-- Boundary behavior:
-  - Squares bounce when touching screen edges.
-
-### Jitter Model
-Jitter uses a small angle `theta` (in radians) and rotates the velocity vector:
+Jitter uses velocity rotation:
 
 $$
 v_x' = v_x \cos(\theta) - v_y \sin(\theta)
@@ -43,125 +47,101 @@ $$
 v_y' = v_x \sin(\theta) + v_y \cos(\theta)
 $$
 
-This changes direction smoothly while preserving speed magnitude.
+This changes direction while mostly preserving speed magnitude.
 
-## Key Constants
-- `SCREEN_WIDTH`, `SCREEN_HEIGHT`: canvas size.
-- `FPS`: target frame rate.
-- `SQUARE_COUNT`: number of animated squares.
-- `SQUARE_MIN_SIZE`, `SQUARE_MAX_SIZE`: random size range.
-- `SPEED_MIN`, `SPEED_MAX`: initial speed range.
-- `GLOBAL_MAX_SPEED`: upper speed cap used by size-based scaling.
-- `JITTER_CHANCE`: probability of jitter per frame.
+## Rendering
+- Background: solid black.
+- Circle rendering:
+  - Uses anti-aliased `pygame.gfxdraw` when available.
+  - Falls back to `pygame.draw.circle` if `gfxdraw` is unavailable.
+- FPS counter is shown at the top-left of the window.
 
-## Core Functions
-- `create_random_square()`:
-  - Creates one square with random size, color, and size-scaled max speed.
-- `create_squares(count)`:
-  - Creates a list of squares.
-- `update_square(square, dt)`:
-  - Advances one square using delta time and optional jitter rotation.
-- `update_squares(squares, dt)`:
-  - Updates all squares in one frame.
-- `_apply_boundary(square)`:
-  - Applies edge-bounce logic.
-- `draw_background(screen)`:
-  - Draws the gradient background.
-- `draw_square(screen, square)`:
-  - Draws one styled square.
-- `draw_squares(screen, squares)`:
-  - Draws all squares.
-- `run()`:
-  - Runs the app loop and computes `dt` each frame.
-
-## Project Structure
-- [main.py](main.py): application logic and rendering.
-- [test_main.py](test_main.py): automated test suite.
-- [REPORT.md](REPORT.md): project report.
-- [JOURNAL.md](JOURNAL.md): interaction/change log.
+## Project Files
+- [main.py](main.py): simulation logic, physics, rendering, game loop.
+- [test_main.py](test_main.py): automated tests for current circle implementation.
+- [REPORT.md](REPORT.md): report document.
+- [JOURNAL.md](JOURNAL.md): change and interaction log.
 
 ## Requirements
 - Python 3.10+
-- Pygame
-- Pytest
+- pygame-ce
+- pytest
 
 ## Setup
-The repository already contains [.venv](.venv), but you can create your own if needed.
-
-Use existing environment (PowerShell):
+Use existing virtual environment (PowerShell):
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install pygame pytest
+python -m pip install pygame-ce pytest
 ```
 
-Create new environment (PowerShell):
+Create a new virtual environment (PowerShell):
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install pygame pytest
+python -m pip install pygame-ce pytest
 ```
 
 ## Run the App
-From project root:
+From the project root:
 
 ```powershell
 python main.py
 ```
 
 Expected result:
-- A window titled "Random Moving Squares"
-- 100 moving squares
-- Smooth movement from `dt`
-- Subtle direction jitter over time
-- Edge bounce and gradient background
+- Window title: "Hierarchical Magnetic Circles".
+- 30 colored circles moving with smooth dt-based motion.
+- Small random trajectory jitter.
+- Repel interactions with size-based behavior.
+- Visible FPS counter.
 
 ## Run Tests
-Recommended:
+Quick run:
 
 ```powershell
 python -m pytest -q
 ```
 
-Verbose:
+Verbose run:
 
 ```powershell
 python -m pytest -v
 ```
 
-Direct file execution:
+Direct module run:
 
 ```powershell
 python test_main.py
 ```
 
-Current test coverage in [test_main.py](test_main.py):
-- Square creation and bounds
-- Size and speed constraints
-- Boundary collisions
-- Jitter behavior
-- `dt`-based movement updates
-- Rendering path safety with pygame mocks
-- Integration behavior over multiple frames
+Current suite validates:
+- Circle creation and bounds.
+- Boundary bounce behavior.
+- Jitter behavior.
+- Repel force and speed clamping.
+- Overlap solver behavior.
+- Integration behavior across many frames.
+- Rendering path safety.
 
 ## Troubleshooting
-### `ModuleNotFoundError: No module named 'pygame'`
-Install pygame in the active environment:
+### ModuleNotFoundError for pygame
+Install dependencies in the active environment:
 
 ```powershell
-python -m pip install pygame
+python -m pip install pygame-ce pytest
 ```
 
-### Wrong interpreter / environment
-Run tests and app with the venv interpreter directly:
+### Wrong interpreter is being used
+Run commands with the venv Python explicitly:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe main.py
 ```
 
-### Tests fail after logic changes
-If you change function signatures or motion logic, update [test_main.py](test_main.py) so tests match the new API and behavior.
+### Behavior changed after physics edits
+If you modify repel or overlap logic, update [test_main.py](test_main.py) so tests match the intended behavior.

@@ -399,3 +399,18 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 14:15
 - **Prompt**: Update the readme file accordingly and make sure to recheck everything before commiting and pushing the code.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 14:17
+- **Prompt**: Update the readme file accordingly and make sure to recheck everything before commiting and pushing the code.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 14:17
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: Update the readme file accordingly and make sure to recheck everything before commiting and pushing the code.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Updated README.md to match the current circle-based implementation and verification workflow, then re-ran diagnostics and full tests (18 passed).
+- **Context and Reasons for Changes**: User requested documentation alignment with the latest code plus full recheck before commit and push.
