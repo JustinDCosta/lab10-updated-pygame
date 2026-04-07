@@ -29,6 +29,7 @@ import main as app
 
 from main import (
     Square,
+    apply_flee_from_larger_squares,
     create_random_square,
     create_squares,
     update_square,
@@ -254,6 +255,49 @@ class TestUpdateSquares:
         """Test that empty list doesn't cause errors."""
         squares: list[Square] = []
         update_squares(squares, dt=1.0)  # Should not raise
+
+
+class TestFleeBehavior:
+    """Tests for flee-away interaction between different square sizes."""
+
+    def test_smaller_square_flees_away_from_larger_square(self):
+        """Small square should accelerate away from a nearby larger square."""
+        small = Square(x=130, y=100, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
+        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
+
+        apply_flee_from_larger_squares([small, large], dt=1.0)
+
+        assert small.vx > 0.0
+
+    def test_larger_square_does_not_flee_smaller_square(self):
+        """Larger square should not react to a smaller square as a threat."""
+        small = Square(x=130, y=100, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
+        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
+
+        apply_flee_from_larger_squares([small, large], dt=1.0)
+
+        assert large.vx == 0.0
+        assert large.vy == 0.0
+
+    def test_no_flee_when_larger_square_is_far_away(self):
+        """No flee force should apply when threat is outside check radius."""
+        small = Square(x=20, y=20, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
+        large = Square(x=700, y=500, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
+
+        apply_flee_from_larger_squares([small, large], dt=1.0)
+
+        assert small.vx == 0.0
+        assert small.vy == 0.0
+
+    def test_flee_speed_is_clamped_to_square_limit(self):
+        """Flee acceleration should not exceed each square max speed."""
+        small = Square(x=130, y=100, vx=49.5, vy=0.0, color=(255, 0, 0), size=20, max_speed=50)
+        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=54, max_speed=200)
+
+        apply_flee_from_larger_squares([small, large], dt=1.0)
+
+        speed = math.hypot(small.vx, small.vy)
+        assert speed <= 50.0 + 1e-6
 
 
 class TestDrawSquare:

@@ -1,5 +1,3 @@
-"""Pygame app that renders 100 squares with subtle jitter and edge bounce."""
-
 from __future__ import annotations
 
 import random
@@ -14,7 +12,7 @@ BG_TOP_COLOR: tuple[int, int, int] = (18, 22, 38)
 BG_BOTTOM_COLOR: tuple[int, int, int] = (34, 48, 72)
 FPS: int = 60
 
-SQUARE_COUNT: int = 100  # Number of squares to draw
+SQUARE_COUNT: int = 30  # Number of squares to draw
 SQUARE_SIZE: int = 30
 SQUARE_MIN_SIZE: int = 18  # Smallest square size
 SQUARE_MAX_SIZE: int = 54  # Largest square size
@@ -29,8 +27,8 @@ JITTER_ANGLE_MIN: float = -0.1
 JITTER_ANGLE_MAX: float = 0.1
 
 # Flee behavior scaffold values
-FLEE_CHECK_RADIUS: float = 140.0
-FLEE_ACCELERATION: float = 120.0
+FLEE_CHECK_RADIUS: float = 180.0
+FLEE_ACCELERATION: float = 420.0
 
 
 @dataclass
@@ -105,6 +103,18 @@ def _rotate_velocity(square: Square, angle_radians: float) -> None:
     square.vy = new_vy
 
 
+def _square_center(square: Square) -> tuple[float, float]:
+    return (square.x + square.size * 0.5, square.y + square.size * 0.5)
+
+
+def _clamp_speed(square: Square) -> None:
+    speed = math.hypot(square.vx, square.vy)
+    if speed > square.max_speed and speed > 0:
+        scale = square.max_speed / speed
+        square.vx *= scale
+        square.vy *= scale
+
+
 def apply_random_trajectory_jitter(square: Square) -> None:
     """Keep movement slightly random by rotating velocity sometimes."""
     if random.random() < JITTER_CHANCE:
@@ -113,43 +123,42 @@ def apply_random_trajectory_jitter(square: Square) -> None:
 
 
 def apply_flee_from_larger_squares(squares: list[Square], dt: float) -> None:
-    """Stub: steer smaller squares away from nearby larger squares.
-
-    TODO 1: For each square, look for larger squares within FLEE_CHECK_RADIUS.
-    TODO 2: Build a flee direction vector from the larger square to the smaller one.
-    TODO 3: Weight flee strength by size difference and distance.
-    TODO 4: Add flee acceleration to velocity using dt.
-    TODO 5: Clamp velocity to each square.max_speed after applying flee force.
-    """
-    # TODO: Implement flee steering and velocity updates.
+    """Steer smaller squares away from larger nearby squares."""
     for square in squares:
         flee_accel_x = 0.0
         flee_accel_y = 0.0
+        sx, sy = _square_center(square)
         
         for other_square in squares:
-            if other_square.size > square.size:
-                diff_x = square.x - other_square.x
-                diff_y = square.y - other_square.y
-                
-                distance = math.sqrt(diff_x * diff_x + diff_y * diff_y)
-                
-                if distance < FLEE_CHECK_RADIUS and distance > 0:
-                    dir_x = diff_x / distance
-                    dir_y = diff_y / distance
-                    
-                    size_diff = other_square.size - square.size
-                    weight = size_diff / distance
-                    
-                    flee_accel_x += dir_x * weight * FLEE_ACCELERATION
-                    flee_accel_y += dir_y * weight * FLEE_ACCELERATION
+            if other_square is square or other_square.size <= square.size:
+                continue
+
+            ox, oy = _square_center(other_square)
+            diff_x = sx - ox
+            diff_y = sy - oy
+            distance = math.hypot(diff_x, diff_y)
+
+            if distance <= 1e-6 or distance >= FLEE_CHECK_RADIUS:
+                continue
+
+            dir_x = diff_x / distance
+            dir_y = diff_y / distance
+
+            size_threat = (other_square.size - square.size) / max(SQUARE_MAX_SIZE, 1)
+            proximity = 1.0 - (distance / FLEE_CHECK_RADIUS)
+            strength = max(size_threat * proximity, 0.0)
+
+            flee_accel_x += dir_x * strength
+            flee_accel_y += dir_y * strength
+
+        flee_strength = math.hypot(flee_accel_x, flee_accel_y)
+        if flee_strength > 1.0:
+            flee_accel_x /= flee_strength
+            flee_accel_y /= flee_strength
         
-        square.vx += flee_accel_x * dt
-        square.vy += flee_accel_y * dt
-        
-        current_speed = math.sqrt(square.vx * square.vx + square.vy * square.vy)
-        if current_speed > square.max_speed:
-            square.vx = (square.vx / current_speed) * square.max_speed
-            square.vy = (square.vy / current_speed) * square.max_speed
+        square.vx += flee_accel_x * FLEE_ACCELERATION * dt
+        square.vy += flee_accel_y * FLEE_ACCELERATION * dt
+        _clamp_speed(square)
 
 
 def update_square(square: Square, dt: float) -> None:
@@ -164,11 +173,10 @@ def update_square(square: Square, dt: float) -> None:
 
 def update_squares(squares: list[Square], dt: float) -> None:
     """Update all squares each frame."""
+    apply_flee_from_larger_squares(squares, dt)
+
     for square in squares:
         update_square(square, dt)
-
-    # TODO: Enable interaction by applying flee logic after base movement.
-    apply_flee_from_larger_squares(squares, dt)
 
 
 def draw_background(screen: pygame.Surface) -> None:

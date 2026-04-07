@@ -331,3 +331,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 11:50
 - **Prompt**: Still doesnt work. Can you please check the whole code and see what is wrong with it. Again, the feature I want is where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. so basically a small block would try its best to avoid going near to the bigger block, essentially fleeing away.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 11:53
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: Still doesnt work. Can you please check the whole code and see what is wrong with it. Again, the feature I want is where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. so basically a small block would try its best to avoid going near to the bigger block, essentially fleeing away.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Reworked flee logic to use center-based weighted steering, increased responsiveness constants, added speed-clamp helper, and reordered update flow to apply flee force before movement. Added dedicated flee behavior tests and validated full suite.
+- **Context and Reasons for Changes**: User reported flee behavior still not working; fixes target root-cause logic quality rather than syntax issues.
+
