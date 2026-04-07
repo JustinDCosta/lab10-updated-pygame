@@ -294,3 +294,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Changes Made**: Added v2.py as a separate modern feature-rich version (clock, live overlay controls, dynamic block count/size, optional collisions, visual effects) while leaving main.py untouched. Validated syntax compilation.
 - **Context and Reasons for Changes**: User requested the modern variant in a new file rather than replacing main.py.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 10:54
+- **Prompt**: Update it in the readme

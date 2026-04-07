@@ -56,3 +56,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 10:46
 - **Prompt**: now make it look like that modern version that we made and with all those extra features. dont put it into main.py. Make a different version and name it v2.py
 
+### 07-04-2026 10:54
+- **Prompt**: Update it in the readme
+
