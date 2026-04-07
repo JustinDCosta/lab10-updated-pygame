@@ -278,3 +278,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Changes Made**: Rewrote README.md to match current dt-based movement, 100-square setup, size-speed scaling, trigonometric jitter, updated function signatures, and current test coverage. Verified tests still pass.
 - **Context and Reasons for Changes**: User requested documentation updates for the latest app logic and behavior.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 10:46
+- **Prompt**: now make it look like that modern version that we made and with all those extra features. dont put it into main.py. Make a different version and name it v2.py
