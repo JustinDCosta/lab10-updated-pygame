@@ -71,3 +71,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 12:09
 - **Prompt**: correc the sizes and speed accrodingly too. Also change the squares design to make them simple squares.
 
+### 07-04-2026 13:18
+- **Prompt**: I have changed a lot of the code. Made them circles instead of squares and the logic on how the blocks repel and behave. I want you to go through and verify the code and check if everything works correct and if it cna be further optimised.
+

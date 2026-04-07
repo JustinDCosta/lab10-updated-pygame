@@ -374,3 +374,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Changes Made**: Implemented stronger non-penetration behavior with iterative clearance solving, spawn-time clearance cleanup, and tuned speed scaling for current dt logic. Verified with full tests and randomized simulation.
 - **Context and Reasons for Changes**: User reported that previous flee behavior still allowed near/overlap interactions; this update enforces hard separation.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 13:18
+- **Prompt**: I have changed a lot of the code. Made them circles instead of squares and the logic on how the blocks repel and behave. I want you to go through and verify the code and check if everything works correct and if it cna be further optimised.
