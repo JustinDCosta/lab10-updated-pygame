@@ -25,6 +25,12 @@ GLOBAL_MAX_SPEED: float = 360.0
 COLOR_MIN: int = 50
 COLOR_MAX: int = 255
 JITTER_CHANCE: float = 0.05
+JITTER_ANGLE_MIN: float = -0.1
+JITTER_ANGLE_MAX: float = 0.1
+
+# Flee behavior scaffold values
+FLEE_CHECK_RADIUS: float = 140.0
+FLEE_ACCELERATION: float = 120.0
 
 
 @dataclass
@@ -91,20 +97,40 @@ def _apply_boundary(square: Square) -> None:
         square.vy *= -1
 
 
+def _rotate_velocity(square: Square, angle_radians: float) -> None:
+    """Rotate a velocity vector by a small angle."""
+    new_vx = square.vx * math.cos(angle_radians) - square.vy * math.sin(angle_radians)
+    new_vy = square.vx * math.sin(angle_radians) + square.vy * math.cos(angle_radians)
+    square.vx = new_vx
+    square.vy = new_vy
+
+
+def apply_random_trajectory_jitter(square: Square) -> None:
+    """Keep movement slightly random by rotating velocity sometimes."""
+    if random.random() < JITTER_CHANCE:
+        angle = random.uniform(JITTER_ANGLE_MIN, JITTER_ANGLE_MAX)
+        _rotate_velocity(square, angle)
+
+
+def apply_flee_from_larger_squares(squares: list[Square], dt: float) -> None:
+    """Stub: steer smaller squares away from nearby larger squares.
+
+    TODO 1: For each square, look for larger squares within FLEE_CHECK_RADIUS.
+    TODO 2: Build a flee direction vector from the larger square to the smaller one.
+    TODO 3: Weight flee strength by size difference and distance.
+    TODO 4: Add flee acceleration to velocity using dt.
+    TODO 5: Clamp velocity to each square.max_speed after applying flee force.
+    """
+    # TODO: Implement flee steering and velocity updates.
+    _ = (squares, dt, FLEE_CHECK_RADIUS, FLEE_ACCELERATION)
+
+
 def update_square(square: Square, dt: float) -> None:
     """Advance one square by one frame."""
     square.x += square.vx * dt  # Use delta time for frame-independent movement
     square.y += square.vy * dt
 
-    # Rotate velocity by a small random angle to create gentle jitter.
-    if random.random() < JITTER_CHANCE:
-        theta = random.uniform(-0.1, 0.1)  # Small random angle in radians
-        
-        new_vx = square.vx * math.cos(theta) - square.vy * math.sin(theta)
-        new_vy = square.vx * math.sin(theta) + square.vy * math.cos(theta)
-        
-        square.vx = new_vx
-        square.vy = new_vy
+    apply_random_trajectory_jitter(square)
 
     _apply_boundary(square)
 
@@ -113,6 +139,9 @@ def update_squares(squares: list[Square], dt: float) -> None:
     """Update all squares each frame."""
     for square in squares:
         update_square(square, dt)
+
+    # TODO: Enable interaction by applying flee logic after base movement.
+    apply_flee_from_larger_squares(squares, dt)
 
 
 def draw_background(screen: pygame.Surface) -> None:
@@ -169,6 +198,10 @@ def run() -> None:
     pygame.display.set_caption("Random Moving Squares")
     clock = pygame.time.Clock()
 
+    #the font for the FPS counter
+    pygame.font.init()
+    fps_font = pygame.font.SysFont("Arial", 24, bold=True)
+
     squares = create_squares(SQUARE_COUNT)
     running = True
 
@@ -182,6 +215,14 @@ def run() -> None:
         update_squares(squares, dt)
         draw_background(screen)
         draw_squares(screen, squares)
+
+        #calculate and render the FPS
+        current_fps = clock.get_fps()
+        # Render the text surface (Text, Antialias, Color)
+        fps_surface = fps_font.render(f"FPS: {int(current_fps)}", True, (0, 255, 0)) 
+        #putting the text surface to the top-left corner of the screen
+        screen.blit(fps_surface, (10, 10))
+
         pygame.display.flip()
 
     pygame.quit()

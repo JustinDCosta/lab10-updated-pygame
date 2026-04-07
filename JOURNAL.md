@@ -299,3 +299,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 11:33
 - **Prompt**: I want to implement a feature where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. GIve me stubs and todos to fill out and also the explanations on how they work.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 11:35
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: I want to implement a feature where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. GIve me stubs and todos to fill out and also the explanations on how they work.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Added flee-behavior scaffolding and TODO stubs in main.py, extracted jitter into a helper function, and preserved existing runtime behavior. Ran tests successfully.
+- **Context and Reasons for Changes**: User requested implementation scaffolding with TODOs and explanations for small blocks fleeing larger blocks while keeping random trajectories.
+
