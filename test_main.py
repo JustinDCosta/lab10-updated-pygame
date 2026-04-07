@@ -42,6 +42,7 @@ from main import (
     SQUARE_SIZE,
     SQUARE_MIN_SIZE,
     SQUARE_MAX_SIZE,
+    FLEE_SAFE_MARGIN,
     SPEED_MIN,
     SPEED_MAX,
 )
@@ -298,6 +299,36 @@ class TestFleeBehavior:
 
         speed = math.hypot(small.vx, small.vy)
         assert speed <= 50.0 + 1e-6
+
+    def test_small_square_keeps_safe_distance_when_initially_overlapping(self):
+        """Small square should be pushed out to at least the configured safe margin."""
+        small = Square(x=120, y=120, vx=0.0, vy=0.0, color=(255, 0, 0), size=12, max_speed=8)
+        large = Square(x=130, y=120, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=4)
+
+        apply_flee_from_larger_squares([small, large], dt=1 / 60)
+
+        sx, sy = app._square_center(small)
+        bx, by = app._square_center(large)
+        distance = math.hypot(sx - bx, sy - by)
+        minimum_distance = small.size * 0.5 + large.size * 0.5 + FLEE_SAFE_MARGIN
+        assert distance >= minimum_distance - 1e-6
+
+    def test_small_square_does_not_penetrate_large_square_over_time(self):
+        """Small square should maintain clearance while trying to move toward a large square."""
+        small = Square(x=220, y=220, vx=4.0, vy=0.0, color=(255, 0, 0), size=12, max_speed=8)
+        large = Square(x=280, y=220, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=4)
+        squares = [small, large]
+
+        min_gap = float("inf")
+        for _ in range(240):
+            update_squares(squares, dt=1 / 60)
+            sx, sy = app._square_center(small)
+            bx, by = app._square_center(large)
+            center_dist = math.hypot(sx - bx, sy - by)
+            min_allowed = small.size * 0.5 + large.size * 0.5 + FLEE_SAFE_MARGIN
+            min_gap = min(min_gap, center_dist - min_allowed)
+
+        assert min_gap >= -1e-6
 
 
 class TestDrawSquare:

@@ -347,3 +347,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 11:57
 - **Prompt**: same problem. The feature should be smaller block should not  even go near the bigger block. Shouldnt collide or go through each other. The smaller blocks should act like magnets that oppse the bigger blocks.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 12:06
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: same problem. The feature should be smaller block should not  even go near the bigger block. Shouldnt collide or go through each other. The smaller blocks should act like magnets that oppse the bigger blocks.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Implemented hard small-vs-big clearance enforcement with iterative solver passes, spawn-time separation, coherent speed scaling for current velocity ranges, and added tests for safe-distance and non-penetration behavior.
+- **Context and Reasons for Changes**: User reported flee behavior still failing; fixes enforce strict avoidance and prevent overlap/go-through cases.
+

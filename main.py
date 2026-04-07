@@ -13,13 +13,13 @@ BG_BOTTOM_COLOR: tuple[int, int, int] = (34, 48, 72)
 FPS: int = 60
 
 SQUARE_COUNT: int = 30  # Number of squares to draw
-SQUARE_SIZE: int = 30
-SQUARE_MIN_SIZE: int = 18  # Smallest square size
-SQUARE_MAX_SIZE: int = 54  # Largest square size
+SQUARE_SIZE: int = 20
+SQUARE_MIN_SIZE: int = 10  # Smallest square size
+SQUARE_MAX_SIZE: int = 50  # Largest square size
 SQUARE_BORDER_COLOR: tuple[int, int, int] = (240, 246, 255)
-SPEED_MIN: int = 60
-SPEED_MAX: int = 240
-GLOBAL_MAX_SPEED: float = 360.0
+SPEED_MIN: int = 2
+SPEED_MAX: int = 4
+GLOBAL_MAX_SPEED: float = 8.0
 COLOR_MIN: int = 50
 COLOR_MAX: int = 255
 JITTER_CHANCE: float = 0.05
@@ -29,6 +29,8 @@ JITTER_ANGLE_MAX: float = 0.1
 # Flee behavior scaffold values
 FLEE_CHECK_RADIUS: float = 180.0
 FLEE_ACCELERATION: float = 420.0
+FLEE_SAFE_MARGIN: float = 14.0
+CLEARANCE_SOLVER_PASSES: int = 6
 
 
 @dataclass
@@ -52,8 +54,8 @@ def create_random_square() -> Square:
     # size_factor is in the 0-1 range, where 1 means the smallest square.
     size_factor = (SQUARE_MAX_SIZE - size) / max(1, (SQUARE_MAX_SIZE - SQUARE_MIN_SIZE))
 
-    # Scale speed from 60.0 up to GLOBAL_MAX_SPEED.
-    max_speed = 60.0 + (GLOBAL_MAX_SPEED - 60.0) * size_factor
+    # Scale speed from SPEED_MIN up to GLOBAL_MAX_SPEED.
+    max_speed = float(SPEED_MIN) + (GLOBAL_MAX_SPEED - float(SPEED_MIN)) * size_factor
     max_speed = min(max_speed, GLOBAL_MAX_SPEED)  # Keep within the global limit
 
     x = random.randint(0, SCREEN_WIDTH - size)
@@ -76,7 +78,10 @@ def create_random_square() -> Square:
 
 def create_squares(count: int) -> list[Square]:
     """Create a list of random squares."""
-    return [create_random_square() for _ in range(count)]
+    squares = [create_random_square() for _ in range(count)]
+    # Initial spawn can overlap; run a few separation passes to clean it up.
+    enforce_small_big_clearance(squares)
+    return squares
 
 
 def _apply_boundary(square: Square) -> None:
@@ -107,12 +112,65 @@ def _square_center(square: Square) -> tuple[float, float]:
     return (square.x + square.size * 0.5, square.y + square.size * 0.5)
 
 
+def _set_square_center(square: Square, cx: float, cy: float) -> None:
+    square.x = cx - square.size * 0.5
+    square.y = cy - square.size * 0.5
+
+
 def _clamp_speed(square: Square) -> None:
     speed = math.hypot(square.vx, square.vy)
     if speed > square.max_speed and speed > 0:
         scale = square.max_speed / speed
         square.vx *= scale
         square.vy *= scale
+
+
+def _enforce_small_vs_big_separation(small: Square, big: Square) -> bool:
+    sx, sy = _square_center(small)
+    bx, by = _square_center(big)
+
+    diff_x = sx - bx
+    diff_y = sy - by
+    distance = math.hypot(diff_x, diff_y)
+
+    minimum_distance = small.size * 0.5 + big.size * 0.5 + FLEE_SAFE_MARGIN
+    if distance >= minimum_distance:
+        return False
+
+    if distance <= 1e-6:
+        dir_x, dir_y = 1.0, 0.0
+    else:
+        dir_x, dir_y = diff_x / distance, diff_y / distance
+
+    target_cx = bx + dir_x * minimum_distance
+    target_cy = by + dir_y * minimum_distance
+    _set_square_center(small, target_cx, target_cy)
+
+    # Remove inward velocity and add a small outward nudge.
+    inward_component = small.vx * dir_x + small.vy * dir_y
+    if inward_component < 0:
+        small.vx -= inward_component * dir_x
+        small.vy -= inward_component * dir_y
+
+    small.vx += dir_x * FLEE_ACCELERATION * 0.08
+    small.vy += dir_y * FLEE_ACCELERATION * 0.08
+    _clamp_speed(small)
+    _apply_boundary(small)
+    return True
+
+
+def enforce_small_big_clearance(squares: list[Square]) -> None:
+    """Ensure smaller squares keep a safe distance from larger squares."""
+    for _ in range(CLEARANCE_SOLVER_PASSES):
+        any_adjustment = False
+        for small in squares:
+            for big in squares:
+                if big is small or big.size <= small.size:
+                    continue
+                any_adjustment = _enforce_small_vs_big_separation(small, big) or any_adjustment
+
+        if not any_adjustment:
+            break
 
 
 def apply_random_trajectory_jitter(square: Square) -> None:
@@ -160,6 +218,8 @@ def apply_flee_from_larger_squares(squares: list[Square], dt: float) -> None:
         square.vy += flee_accel_y * FLEE_ACCELERATION * dt
         _clamp_speed(square)
 
+    enforce_small_big_clearance(squares)
+
 
 def update_square(square: Square, dt: float) -> None:
     """Advance one square by one frame."""
@@ -177,6 +237,8 @@ def update_squares(squares: list[Square], dt: float) -> None:
 
     for square in squares:
         update_square(square, dt)
+
+    enforce_small_big_clearance(squares)
 
 
 def draw_background(screen: pygame.Surface) -> None:
