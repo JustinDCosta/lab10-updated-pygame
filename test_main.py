@@ -1,418 +1,234 @@
-"""Test suite for main.py pygame square movement application."""
+"""Tests for circle-based movement and magnetic repel behavior in main.py."""
+
+from __future__ import annotations
 
 import math
+import os
+import random
+from collections.abc import Iterator
+
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+
+import pygame
 import pytest
-from unittest.mock import Mock
-import sys
-from unittest.mock import MagicMock
-
-
-class DummyRect:
-    """Minimal Rect replacement for draw-path unit tests."""
-
-    def __init__(self, x: int, y: int, w: int, h: int):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-
-    def inflate(self, dx: int, dy: int) -> "DummyRect":
-        return DummyRect(self.x - dx // 2, self.y - dy // 2, self.w + dx, self.h + dy)
-
-
-# Mock pygame before importing main
-pygame_mock = MagicMock()
-pygame_mock.Rect = DummyRect
-sys.modules["pygame"] = pygame_mock
 
 import main as app
-
 from main import (
-    Square,
-    apply_flee_from_larger_squares,
-    create_random_square,
-    create_squares,
-    update_square,
-    update_squares,
-    draw_square,
-    draw_squares,
-    SCREEN_WIDTH,
+    CIRCLE_COUNT,
+    CIRCLE_MAX_RADIUS,
+    CIRCLE_MIN_RADIUS,
+    COLOR_MAX,
+    COLOR_MIN,
+    GLOBAL_MAX_SPEED,
     SCREEN_HEIGHT,
-    SQUARE_COUNT,
-    SQUARE_SIZE,
-    SQUARE_MIN_SIZE,
-    SQUARE_MAX_SIZE,
-    FLEE_SAFE_MARGIN,
-    SPEED_MIN,
-    SPEED_MAX,
+    SCREEN_WIDTH,
+    Circle,
+    apply_magnetic_repel,
+    create_circles,
+    create_random_circle,
+    draw_circle,
+    draw_circles,
+    update_circle,
+    update_circles,
 )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def init_pygame() -> Iterator[None]:
+    """Initialize pygame once for draw tests using a headless video driver."""
+    pygame.init()
+    yield
+    pygame.quit()
 
 
 @pytest.fixture(autouse=True)
 def disable_jitter_by_default(monkeypatch):
-    """Keep tests deterministic unless a specific test enables jitter."""
+    """Keep updates deterministic unless a test explicitly enables jitter."""
     monkeypatch.setattr(app.random, "random", lambda: 1.0)
 
 
-class TestSquareDataModel:
-    """Tests for the Square dataclass."""
-
-    def test_square_creation_with_defaults(self):
-        """Test Square creation with default size."""
-        square = Square(x=10, y=20, vx=2, vy=-1, color=(255, 0, 0))
-        assert square.x == 10
-        assert square.y == 20
-        assert square.vx == 2
-        assert square.vy == -1
-        assert square.color == (255, 0, 0)
-        assert square.size == SQUARE_SIZE
-
-    def test_square_creation_with_custom_size(self):
-        """Test Square creation with custom size."""
-        square = Square(x=5, y=5, vx=1, vy=1, color=(0, 255, 0), size=50)
-        assert square.size == 50
+class TestCircleModel:
+    def test_circle_creation(self):
+        circle = Circle(x=10, y=20, vx=3, vy=-4, color=(10, 20, 30), radius=14, base_speed=5.0)
+        assert circle.x == 10
+        assert circle.y == 20
+        assert circle.vx == 3
+        assert circle.vy == -4
+        assert circle.color == (10, 20, 30)
+        assert circle.radius == 14
+        assert circle.base_speed == 5.0
+        assert circle.max_speed == GLOBAL_MAX_SPEED
 
 
-class TestCreateRandomSquare:
-    """Tests for create_random_square function."""
+class TestCreation:
+    def test_create_random_circle_stays_in_bounds(self):
+        for _ in range(40):
+            circle = create_random_circle()
+            assert circle.radius >= CIRCLE_MIN_RADIUS
+            assert circle.radius <= CIRCLE_MAX_RADIUS
+            assert circle.radius <= circle.x <= SCREEN_WIDTH - circle.radius
+            assert circle.radius <= circle.y <= SCREEN_HEIGHT - circle.radius
 
-    def test_creates_square_instance(self):
-        """Test that a Square instance is returned."""
-        square = create_random_square()
-        assert isinstance(square, Square)
+    def test_create_random_circle_color_range(self):
+        for _ in range(20):
+            circle = create_random_circle()
+            r, g, b = circle.color
+            assert COLOR_MIN <= r <= COLOR_MAX
+            assert COLOR_MIN <= g <= COLOR_MAX
+            assert COLOR_MIN <= b <= COLOR_MAX
 
-    def test_position_in_bounds(self):
-        """Test that random square position is within screen bounds."""
-        for _ in range(10):
-            square = create_random_square()
-            assert 0 <= square.x <= SCREEN_WIDTH - square.size
-            assert 0 <= square.y <= SCREEN_HEIGHT - square.size
-
-    def test_size_in_range(self):
-        """Test that random square sizes are within configured limits."""
-        for _ in range(10):
-            square = create_random_square()
-            assert SQUARE_MIN_SIZE <= square.size <= SQUARE_MAX_SIZE
-
-    def test_velocity_in_range(self):
-        """Test that velocity magnitude is within speed range."""
-        for _ in range(10):
-            square = create_random_square()
-            abs_vx = abs(square.vx)
-            abs_vy = abs(square.vy)
-            assert SPEED_MIN <= abs_vx <= SPEED_MAX
-            assert SPEED_MIN <= abs_vy <= SPEED_MAX
-
-    def test_velocity_has_direction(self):
-        """Test that velocity components are non-zero (have direction)."""
-        square = create_random_square()
-        assert square.vx != 0
-        assert square.vy != 0
-
-    def test_color_in_valid_range(self):
-        """Test that color values are within valid RGB range."""
-        for _ in range(10):
-            square = create_random_square()
-            r, g, b = square.color
-            assert 50 <= r <= 255
-            assert 50 <= g <= 255
-            assert 50 <= b <= 255
+    def test_create_circles_count(self):
+        circles = create_circles(CIRCLE_COUNT)
+        assert len(circles) == CIRCLE_COUNT
+        assert all(isinstance(circle, Circle) for circle in circles)
 
 
-class TestCreateSquares:
-    """Tests for create_squares function."""
+class TestUpdateSingleCircle:
+    def test_update_circle_uses_dt(self):
+        circle = Circle(x=100, y=100, vx=10, vy=-6, color=(255, 0, 0), radius=10, base_speed=11.66)
+        update_circle(circle, dt=0.5)
+        assert circle.x == pytest.approx(105.0)
+        assert circle.y == pytest.approx(97.0)
 
-    def test_creates_correct_count(self):
-        """Test that correct number of squares are created."""
-        squares = create_squares(SQUARE_COUNT)
-        assert len(squares) == SQUARE_COUNT
+    def test_bounce_left_boundary(self):
+        circle = Circle(x=9, y=200, vx=-15, vy=0, color=(255, 0, 0), radius=10, base_speed=15)
+        update_circle(circle, dt=1.0)
+        assert circle.x == 10
+        assert circle.vx > 0
 
-    def test_creates_all_square_instances(self):
-        """Test that all created items are Square instances."""
-        squares = create_squares(5)
-        for square in squares:
-            assert isinstance(square, Square)
-
-    def test_empty_list_for_zero_count(self):
-        """Test that zero count returns empty list."""
-        squares = create_squares(0)
-        assert len(squares) == 0
-        assert isinstance(squares, list)
-
-    def test_variety_in_squares(self):
-        """Test that multiple calls don't create identical squares."""
-        squares = create_squares(3)
-        positions = [(s.x, s.y) for s in squares]
-        # Statistically unlikely to have 3 identical random positions
-        assert len(set(positions)) >= 2  # At least 2 different positions
-
-
-class TestUpdateSquare:
-    """Tests for update_square function."""
-
-    def test_movement_by_velocity(self):
-        """Test that square moves by its velocity each update."""
-        square = Square(x=100, y=100, vx=5, vy=-3, color=(255, 0, 0))
-        original_x = square.x
-        original_y = square.y
-        update_square(square, dt=1.0)
-        assert square.x == original_x + 5
-        assert square.y == original_y - 3
-
-    def test_left_edge_collision(self):
-        """Test bounce when hitting left edge."""
-        square = Square(x=5, y=100, vx=-10, vy=0, color=(255, 0, 0))
-        update_square(square, dt=1.0)
-        assert square.x == 0  # Clamped to edge
-        assert square.vx > 0  # Velocity reversed
-
-    def test_right_edge_collision(self):
-        """Test bounce when hitting right edge."""
-        size = 40
-        square = Square(
-            x=SCREEN_WIDTH - size - 5,
-            y=100,
-            vx=10,
+    def test_bounce_right_boundary(self):
+        circle = Circle(
+            x=SCREEN_WIDTH - 11,
+            y=200,
+            vx=15,
             vy=0,
             color=(255, 0, 0),
-            size=size,
+            radius=10,
+            base_speed=15,
         )
-        update_square(square, dt=1.0)
-        assert square.x == SCREEN_WIDTH - size  # Clamped to edge
-        assert square.vx < 0  # Velocity reversed
+        update_circle(circle, dt=1.0)
+        assert circle.x == SCREEN_WIDTH - 10
+        assert circle.vx < 0
 
-    def test_top_edge_collision(self):
-        """Test bounce when hitting top edge."""
-        square = Square(x=100, y=5, vx=0, vy=-10, color=(255, 0, 0))
-        update_square(square, dt=1.0)
-        assert square.y == 0  # Clamped to edge
-        assert square.vy > 0  # Velocity reversed
-
-    def test_bottom_edge_collision(self):
-        """Test bounce when hitting bottom edge."""
-        size = 40
-        square = Square(
-            x=100,
-            y=SCREEN_HEIGHT - size - 5,
+    def test_bounce_top_and_bottom_boundaries(self):
+        top = Circle(x=200, y=9, vx=0, vy=-8, color=(255, 0, 0), radius=10, base_speed=8)
+        bottom = Circle(
+            x=200,
+            y=SCREEN_HEIGHT - 9,
             vx=0,
-            vy=10,
+            vy=8,
             color=(255, 0, 0),
-            size=size,
+            radius=10,
+            base_speed=8,
         )
-        update_square(square, dt=1.0)
-        assert square.y == SCREEN_HEIGHT - size  # Clamped to edge
-        assert square.vy < 0  # Velocity reversed
 
-    def test_no_collision_inside_bounds(self):
-        """Test that square moves normally when not at edges."""
-        square = Square(x=200, y=200, vx=3, vy=4, color=(255, 0, 0))
-        update_square(square, dt=1.0)
-        assert square.x > 200
-        assert square.y > 200
+        update_circle(top, dt=1.0)
+        update_circle(bottom, dt=1.0)
 
-    def test_velocity_changes_when_jitter_triggers(self, monkeypatch):
-        """Test that velocity changes when jitter condition is forced true."""
+        assert top.y == 10
+        assert top.vy > 0
+        assert bottom.y == SCREEN_HEIGHT - 10
+        assert bottom.vy < 0
+
+    def test_jitter_rotates_velocity_without_speed_loss(self, monkeypatch):
         monkeypatch.setattr(app.random, "random", lambda: 0.0)
-        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.25)
+        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.2)
 
-        square = Square(x=200, y=200, vx=2.0, vy=1.0, color=(255, 0, 0))
-        update_square(square, dt=1.0)
+        circle = Circle(x=100, y=100, vx=3.0, vy=4.0, color=(0, 255, 0), radius=10, base_speed=5.0)
+        before = math.hypot(circle.vx, circle.vy)
 
-        expected_vx = 2.0 * math.cos(0.25) - 1.0 * math.sin(0.25)
-        expected_vy = 2.0 * math.sin(0.25) + 1.0 * math.cos(0.25)
-        assert square.vx == pytest.approx(expected_vx)
-        assert square.vy == pytest.approx(expected_vy)
+        update_circle(circle, dt=1.0)
+        after = math.hypot(circle.vx, circle.vy)
 
-    def test_jitter_rotation_preserves_speed_magnitude(self, monkeypatch):
-        """Test that jitter rotates velocity while preserving speed magnitude."""
-        monkeypatch.setattr(app.random, "random", lambda: 0.0)
-        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.1)
-
-        square = Square(x=200, y=200, vx=5.8, vy=5.9, color=(255, 0, 0), max_speed=6.0)
-        before_speed = math.hypot(square.vx, square.vy)
-        update_square(square, dt=1.0)
-        after_speed = math.hypot(square.vx, square.vy)
-
-        assert after_speed == pytest.approx(before_speed, rel=1e-6)
+        assert after == pytest.approx(before, rel=1e-6)
 
 
-class TestUpdateSquares:
-    """Tests for update_squares function."""
+class TestMagneticRepel:
+    def test_small_circle_flees_large_circle(self):
+        small = Circle(x=180, y=100, vx=0, vy=0, color=(255, 0, 0), radius=10, base_speed=0, max_speed=100)
+        large = Circle(x=120, y=100, vx=0, vy=0, color=(0, 255, 0), radius=24, base_speed=0, max_speed=100)
 
-    def test_updates_all_squares(self):
-        """Test that all squares in list are updated."""
-        squares = [
-            Square(x=100, y=100, vx=5, vy=5, color=(255, 0, 0)),
-            Square(x=200, y=200, vx=3, vy=3, color=(0, 255, 0)),
-            Square(x=300, y=300, vx=2, vy=2, color=(0, 0, 255)),
-        ]
-        update_squares(squares, dt=1.0)
-        # Each square should have moved by its velocity
-        assert squares[0].x > 100
-        assert squares[1].x > 200
-        assert squares[2].x > 300
+        apply_magnetic_repel([small, large], dt=1 / 60)
 
-    def test_empty_list_handled(self):
-        """Test that empty list doesn't cause errors."""
-        squares: list[Square] = []
-        update_squares(squares, dt=1.0)  # Should not raise
+        assert small.vx > 0
 
+    def test_large_circle_ignores_smaller_threat(self):
+        small = Circle(x=180, y=100, vx=0, vy=0, color=(255, 0, 0), radius=10, base_speed=0, max_speed=100)
+        large = Circle(x=120, y=100, vx=0, vy=0, color=(0, 255, 0), radius=24, base_speed=0, max_speed=100)
 
-class TestFleeBehavior:
-    """Tests for flee-away interaction between different square sizes."""
+        apply_magnetic_repel([small, large], dt=1 / 60)
 
-    def test_smaller_square_flees_away_from_larger_square(self):
-        """Small square should accelerate away from a nearby larger square."""
-        small = Square(x=130, y=100, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
-        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
+        assert large.vx == 0
+        assert large.vy == 0
 
-        apply_flee_from_larger_squares([small, large], dt=1.0)
+    def test_speed_is_clamped_after_repel(self):
+        small = Circle(x=180, y=100, vx=49, vy=0, color=(255, 0, 0), radius=10, base_speed=0, max_speed=50)
+        large = Circle(x=120, y=100, vx=0, vy=0, color=(0, 255, 0), radius=30, base_speed=0, max_speed=80)
 
-        assert small.vx > 0.0
+        apply_magnetic_repel([small, large], dt=1.0)
 
-    def test_larger_square_does_not_flee_smaller_square(self):
-        """Larger square should not react to a smaller square as a threat."""
-        small = Square(x=130, y=100, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
-        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
-
-        apply_flee_from_larger_squares([small, large], dt=1.0)
-
-        assert large.vx == 0.0
-        assert large.vy == 0.0
-
-    def test_no_flee_when_larger_square_is_far_away(self):
-        """No flee force should apply when threat is outside check radius."""
-        small = Square(x=20, y=20, vx=0.0, vy=0.0, color=(255, 0, 0), size=20, max_speed=200)
-        large = Square(x=700, y=500, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=200)
-
-        apply_flee_from_larger_squares([small, large], dt=1.0)
-
-        assert small.vx == 0.0
-        assert small.vy == 0.0
-
-    def test_flee_speed_is_clamped_to_square_limit(self):
-        """Flee acceleration should not exceed each square max speed."""
-        small = Square(x=130, y=100, vx=49.5, vy=0.0, color=(255, 0, 0), size=20, max_speed=50)
-        large = Square(x=100, y=100, vx=0.0, vy=0.0, color=(0, 255, 0), size=54, max_speed=200)
-
-        apply_flee_from_larger_squares([small, large], dt=1.0)
-
-        speed = math.hypot(small.vx, small.vy)
-        assert speed <= 50.0 + 1e-6
-
-    def test_small_square_keeps_safe_distance_when_initially_overlapping(self):
-        """Small square should be pushed out to at least the configured safe margin."""
-        small = Square(x=120, y=120, vx=0.0, vy=0.0, color=(255, 0, 0), size=12, max_speed=8)
-        large = Square(x=130, y=120, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=4)
-
-        apply_flee_from_larger_squares([small, large], dt=1 / 60)
-
-        sx, sy = app._square_center(small)
-        bx, by = app._square_center(large)
-        distance = math.hypot(sx - bx, sy - by)
-        minimum_distance = small.size * 0.5 + large.size * 0.5 + FLEE_SAFE_MARGIN
-        assert distance >= minimum_distance - 1e-6
-
-    def test_small_square_does_not_penetrate_large_square_over_time(self):
-        """Small square should maintain clearance while trying to move toward a large square."""
-        small = Square(x=220, y=220, vx=4.0, vy=0.0, color=(255, 0, 0), size=12, max_speed=8)
-        large = Square(x=280, y=220, vx=0.0, vy=0.0, color=(0, 255, 0), size=50, max_speed=4)
-        squares = [small, large]
-
-        min_gap = float("inf")
-        for _ in range(240):
-            update_squares(squares, dt=1 / 60)
-            sx, sy = app._square_center(small)
-            bx, by = app._square_center(large)
-            center_dist = math.hypot(sx - bx, sy - by)
-            min_allowed = small.size * 0.5 + large.size * 0.5 + FLEE_SAFE_MARGIN
-            min_gap = min(min_gap, center_dist - min_allowed)
-
-        assert min_gap >= -1e-6
+        assert math.hypot(small.vx, small.vy) <= 50.0 + 1e-6
 
 
-class TestDrawSquare:
-    """Tests for draw_square function."""
+class TestOverlapSolver:
+    def test_overlap_solver_separates_pair(self):
+        a = Circle(x=100, y=100, vx=0, vy=0, color=(255, 0, 0), radius=20, base_speed=0)
+        b = Circle(x=112, y=100, vx=0, vy=0, color=(0, 255, 0), radius=20, base_speed=0)
 
-    def test_draw_square_calls_pygame_draw(self):
-        """Test that draw_square calls pygame.draw.rect with correct parameters."""
-        mock_screen = Mock()
-        square = Square(x=50, y=75, vx=2, vy=3, color=(100, 150, 200), size=30)
+        changed = app._resolve_overlaps([a, b])
 
-        # We'll just check that rect creation logic is correct
-        draw_square(mock_screen, square)
-
-        # Verify pygame.draw.rect was called
-        mock_screen.draw = Mock()
-        assert callable(draw_square)
-
-    def test_draw_square_with_different_colors(self):
-        """Test that draw_square respects per-square colors."""
-        square1 = Square(x=10, y=10, vx=1, vy=1, color=(255, 0, 0), size=30)
-        square2 = Square(x=20, y=20, vx=1, vy=1, color=(0, 255, 0), size=30)
-
-        # Both should be drawable without errors
-        mock_screen = Mock()
-        draw_square(mock_screen, square1)
-        draw_square(mock_screen, square2)
+        distance = math.hypot(a.x - b.x, a.y - b.y)
+        assert changed
+        assert distance >= 40.0 - 1e-6
 
 
-class TestDrawSquares:
-    """Tests for draw_squares function."""
+class TestUpdateIntegration:
+    def test_update_circles_moves_items(self):
+        circles = create_circles(6)
+        before = [(circle.x, circle.y) for circle in circles]
 
-    def test_draw_multiple_squares(self):
-        """Test that draw_squares processes all squares."""
-        squares = [
-            Square(x=10, y=10, vx=1, vy=1, color=(255, 0, 0)),
-            Square(x=20, y=20, vx=1, vy=1, color=(0, 255, 0)),
-            Square(x=30, y=30, vx=1, vy=1, color=(0, 0, 255)),
-        ]
-        mock_screen = Mock()
-        draw_squares(mock_screen, squares)  # Should not raise
+        update_circles(circles, dt=1 / 60)
 
-    def test_draw_empty_list(self):
-        """Test that drawing empty list doesn't cause errors."""
-        mock_screen = Mock()
-        draw_squares(mock_screen, [])  # Should not raise
+        after = [(circle.x, circle.y) for circle in circles]
+        assert before != after
+
+    def test_update_keeps_circles_in_bounds(self):
+        random.seed(8)
+        circles = create_circles(20)
+
+        for _ in range(360):
+            update_circles(circles, dt=1 / 60)
+            for circle in circles:
+                assert circle.radius <= circle.x <= SCREEN_WIDTH - circle.radius
+                assert circle.radius <= circle.y <= SCREEN_HEIGHT - circle.radius
+
+    def test_long_run_overlap_is_limited(self):
+        random.seed(21)
+        circles = create_circles(20)
+        worst_overlap = 0.0
+
+        for _ in range(360):
+            update_circles(circles, dt=1 / 60)
+            for i, a in enumerate(circles):
+                for b in circles[i + 1 :]:
+                    distance = math.hypot(a.x - b.x, a.y - b.y)
+                    min_distance = a.radius + b.radius
+                    if distance < min_distance:
+                        worst_overlap = max(worst_overlap, min_distance - distance)
+
+        assert worst_overlap <= 1e-3
 
 
-class TestIntegration:
-    """Integration tests combining multiple functions."""
+class TestDrawing:
+    def test_draw_circle_runs(self):
+        screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        circle = Circle(x=100, y=120, vx=0, vy=0, color=(120, 220, 180), radius=12, base_speed=0)
+        draw_circle(screen, circle)
 
-    def test_create_update_cycle(self):
-        """Test creating squares and updating them."""
-        squares = create_squares(5)
-        initial_positions = [(s.x, s.y) for s in squares]
-
-        update_squares(squares, dt=1 / 60)
-
-        final_positions = [(s.x, s.y) for s in squares]
-        # At least some squares should have moved
-        assert initial_positions != final_positions
-
-    def test_squares_stay_in_bounds_after_update(self):
-        """Test that squares remain in bounds after update."""
-        squares = create_squares(10)
-        for _ in range(100):  # Simulate 100 frames
-            update_squares(squares, dt=1 / 60)
-            for square in squares:
-                assert 0 <= square.x <= SCREEN_WIDTH - square.size
-                assert 0 <= square.y <= SCREEN_HEIGHT - square.size
-
-    def test_velocity_can_change_over_time_with_jitter(self, monkeypatch):
-        """Test that velocity can evolve over time when jitter is applied."""
-        monkeypatch.setattr(app.random, "random", lambda: 0.0)
-        monkeypatch.setattr(app.random, "uniform", lambda _a, _b: 0.1)
-
-        sqrt = Square(x=200, y=200, vx=1.5, vy=1.0, color=(255, 0, 0))
-        velocities_seen = set()
-        velocities_seen.add((sqrt.vx, sqrt.vy))
-
-        for _ in range(10):
-            update_square(sqrt, dt=1 / 60)
-            velocities_seen.add((sqrt.vx, sqrt.vy))
-
-        assert len(velocities_seen) > 1
+    def test_draw_circles_runs(self):
+        screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        circles = create_circles(5)
+        draw_circles(screen, circles)
 
 
 if __name__ == "__main__":

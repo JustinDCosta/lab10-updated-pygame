@@ -379,3 +379,18 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 13:18
 - **Prompt**: I have changed a lot of the code. Made them circles instead of squares and the logic on how the blocks repel and behave. I want you to go through and verify the code and check if everything works correct and if it cna be further optimised.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 14:01
+- **Prompt**: I have changed a lot of the code. Made them circles instead of squares and the logic on how the blocks repel and behave. I want you to go through and verify the code and check if everything works correct and if it cna be further optimised.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 14:01
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: I have changed a lot of the code. Made them circles instead of squares and the logic on how the blocks repel and behave. I want you to go through and verify the code and check if everything works correct and if it cna be further optimised.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Replaced stale square-era tests with circle-based coverage, optimized magnetic-force calculation to a single pairwise pass, added iterative overlap stabilization with boundary clamping, added gfxdraw fallback rendering path, installed pygame-ce in the project venv, and validated with pytest (18 passed).
+- **Context and Reasons for Changes**: User requested a full correctness verification and optimization review after major refactor from squares to circles; updates align automated validation with current behavior and reduce physics inconsistency/performance overhead.
