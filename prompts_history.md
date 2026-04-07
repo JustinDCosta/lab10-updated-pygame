@@ -56,3 +56,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 11:26
 - **Prompt**: I have added a fps counter, check out the def run() function and check for any error.
 
+### 07-04-2026 11:33
+- **Prompt**: I want to implement a feature where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. GIve me stubs and todos to fill out and also the explanations on how they work.
+

@@ -283,3 +283,19 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 11:26
 - **Prompt**: I have added a fps counter, check out the def run() function and check for any error.
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 11:28
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: I have added a fps counter, check out the def run() function and check for any error.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Reviewed run() in main.py and validated project tests; no code changes were required.
+- **Context and Reasons for Changes**: User requested verification of newly added FPS counter logic in run().
+
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 11:33
+- **Prompt**: I want to implement a feature where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. GIve me stubs and todos to fill out and also the explanations on how they work.
