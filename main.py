@@ -122,7 +122,34 @@ def apply_flee_from_larger_squares(squares: list[Square], dt: float) -> None:
     TODO 5: Clamp velocity to each square.max_speed after applying flee force.
     """
     # TODO: Implement flee steering and velocity updates.
-    _ = (squares, dt, FLEE_CHECK_RADIUS, FLEE_ACCELERATION)
+    for square in squares:
+        flee_accel_x = 0.0
+        flee_accel_y = 0.0
+        
+        for other_square in squares:
+            if other_square.size > square.size:
+                diff_x = square.x - other_square.x
+                diff_y = square.y - other_square.y
+                
+                distance = math.sqrt(diff_x * diff_x + diff_y * diff_y)
+                
+                if distance < FLEE_CHECK_RADIUS and distance > 0:
+                    dir_x = diff_x / distance
+                    dir_y = diff_y / distance
+                    
+                    size_diff = other_square.size - square.size
+                    weight = size_diff / distance
+                    
+                    flee_accel_x += dir_x * weight * FLEE_ACCELERATION
+                    flee_accel_y += dir_y * weight * FLEE_ACCELERATION
+        
+        square.vx += flee_accel_x * dt
+        square.vy += flee_accel_y * dt
+        
+        current_speed = math.sqrt(square.vx * square.vx + square.vy * square.vy)
+        if current_speed > square.max_speed:
+            square.vx = (square.vx / current_speed) * square.max_speed
+            square.vy = (square.vy / current_speed) * square.max_speed
 
 
 def update_square(square: Square, dt: float) -> None:
