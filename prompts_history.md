@@ -53,9 +53,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 02-04-2026 02:40
 - **Prompt**: Now that everything works, update any other file, especially the README.md for the latest changes that were made, especially about the newer logic.
 
-### 07-04-2026 10:46
-- **Prompt**: now make it look like that modern version that we made and with all those extra features. dont put it into main.py. Make a different version and name it v2.py
-
-### 07-04-2026 10:54
-- **Prompt**: Update it in the readme
+### 07-04-2026 11:26
+- **Prompt**: I have added a fps counter, check out the def run() function and check for any error.
 
