@@ -342,3 +342,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Changes Made**: Reworked flee logic to use center-based weighted steering, increased responsiveness constants, added speed-clamp helper, and reordered update flow to apply flee force before movement. Added dedicated flee behavior tests and validated full suite.
 - **Context and Reasons for Changes**: User reported flee behavior still not working; fixes target root-cause logic quality rather than syntax issues.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 11:57
+- **Prompt**: same problem. The feature should be smaller block should not  even go near the bigger block. Shouldnt collide or go through each other. The smaller blocks should act like magnets that oppse the bigger blocks.
