@@ -59,3 +59,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 11:33
 - **Prompt**: I want to implement a feature where the smaller blocks would flee away from bigger ones. And all square tend to keep a certain randomness to their behaviour/trajectory. GIve me stubs and todos to fill out and also the explanations on how they work.
 
+### 07-04-2026 11:43
+- **Prompt**: Okay, I have did the todos but not sure why it isn't working correctly. Help me figure out the problem.
+
