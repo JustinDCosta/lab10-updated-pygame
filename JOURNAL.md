@@ -283,3 +283,14 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 07-04-2026 10:46
 - **Prompt**: now make it look like that modern version that we made and with all those extra features. dont put it into main.py. Make a different version and name it v2.py
+### **New Interaction**
+- **Agent Version**: 2.2
+- **Date**: 07-04-2026 10:48
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: now make it look like that modern version that we made and with all those extra features. dont put it into main.py. Make a different version and name it v2.py
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Added v2.py as a separate modern feature-rich version (clock, live overlay controls, dynamic block count/size, optional collisions, visual effects) while leaving main.py untouched. Validated syntax compilation.
+- **Context and Reasons for Changes**: User requested the modern variant in a new file rather than replacing main.py.
+
