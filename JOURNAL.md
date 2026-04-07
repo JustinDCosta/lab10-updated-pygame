@@ -358,3 +358,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Changes Made**: Implemented hard small-vs-big clearance enforcement with iterative solver passes, spawn-time separation, coherent speed scaling for current velocity ranges, and added tests for safe-distance and non-penetration behavior.
 - **Context and Reasons for Changes**: User reported flee behavior still failing; fixes enforce strict avoidance and prevent overlap/go-through cases.
 
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 07-04-2026 12:09
+- **Prompt**: correc the sizes and speed accrodingly too. Also change the squares design to make them simple squares.

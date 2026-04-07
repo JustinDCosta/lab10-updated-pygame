@@ -68,3 +68,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 11:57
 - **Prompt**: same problem. The feature should be smaller block should not  even go near the bigger block. Shouldnt collide or go through each other. The smaller blocks should act like magnets that oppse the bigger blocks.
 
+### 07-04-2026 12:09
+- **Prompt**: correc the sizes and speed accrodingly too. Also change the squares design to make them simple squares.
+
