@@ -77,3 +77,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 07-04-2026 14:15
 - **Prompt**: Update the readme file accordingly and make sure to recheck everything before commiting and pushing the code.
 
+### 13-04-2026 14:11
+- **Prompt**: activate the journal logger
+
