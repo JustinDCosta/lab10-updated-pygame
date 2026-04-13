@@ -92,3 +92,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 13-04-2026 14:20
 - **Prompt**: Append a new entry at the end of JOURNAL.md for the latest user prompt: "generate the code explorer site for this project". Use the repository-required journal template from .github/agents/journal-logger.agent.md, include timestamp, concise summary of work (code explorer generation), rationale, and note outputs generated. Preserve chronological order and formatting consistency.
 
+### 13-04-2026 14:48
+- **Prompt**: This used to be lab 8 and connected to lab8 github repo. I have made a lab 10 repo and want to connect this folder with lab 10. here is the code:  git remote add origin https://github.com/JustinDCosta/lab10-updated-pygame.git git branch -M main git push -u origin main
+
