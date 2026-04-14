@@ -491,3 +491,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 14-04-2026 12:31
 - **Prompt**: regenerate the code explorer site
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 14-04-2026 12:31
+- **Prompt**: Regenerate the code explorer site for this workspace using the latest Python sources, especially main.py and test_main.py. Produce a refreshed single-file HTML dashboard at docs/code_explorer.html. Include architecture walkthrough, function map, behavior notes (including circle lifespan/rebirth behavior), and Mermaid diagrams if appropriate. Keep content accurate to current code and ensure the page is self-contained and opens directly in a browser.

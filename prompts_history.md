@@ -98,3 +98,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 14-04-2026 12:31
 - **Prompt**: regenerate the code explorer site
 
+### 14-04-2026 12:31
+- **Prompt**: Regenerate the code explorer site for this workspace using the latest Python sources, especially main.py and test_main.py. Produce a refreshed single-file HTML dashboard at docs/code_explorer.html. Include architecture walkthrough, function map, behavior notes (including circle lifespan/rebirth behavior), and Mermaid diagrams if appropriate. Keep content accurate to current code and ensure the page is self-contained and opens directly in a browser.
+
