@@ -496,3 +496,30 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 14-04-2026 12:31
 - **Prompt**: Regenerate the code explorer site for this workspace using the latest Python sources, especially main.py and test_main.py. Produce a refreshed single-file HTML dashboard at docs/code_explorer.html. Include architecture walkthrough, function map, behavior notes (including circle lifespan/rebirth behavior), and Mermaid diagrams if appropriate. Keep content accurate to current code and ensure the page is self-contained and opens directly in a browser.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 14-04-2026 12:40
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Regenerate the code explorer site for this workspace using the latest Python sources, especially main.py and test_main.py. Produce a refreshed single-file HTML dashboard at docs/code_explorer.html. Include architecture walkthrough, function map, behavior notes (including circle lifespan/rebirth behavior), and Mermaid diagrams if appropriate. Keep content accurate to current code and ensure the page is self-contained and opens directly in a browser.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Regenerated docs/code_explorer.html with refreshed architecture walkthrough, function map, lifespan and rebirth behavior notes, Mermaid diagrams, updated review insights, and learning resources based on latest main.py and test_main.py.
+- **Context and Reasons for Changes**: User requested a current self-contained Code Explorer dashboard reflecting latest Python logic and direct browser rendering.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 14-04-2026 12:45
+- **User**:  justin.d-costa@epita.fr
+- **Prompt**: regenerate the code explorer site
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Regenerated docs/code_explorer.html using the Code Explorer agent to reflect current main.py and test_main.py behavior.
+- **Context and Reasons for Changes**: User requested a refreshed code explorer site after recent implementation updates.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 14-04-2026 14:20
+- **Prompt**: I have updated some of the code with the suggestion provided by the code_explorer and I would like you to check if the code is correct. If it is correct, create appropriate tests for it by editing the test_main.py.
