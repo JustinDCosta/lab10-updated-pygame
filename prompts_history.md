@@ -92,9 +92,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 13-04-2026 14:20
 - **Prompt**: Append a new entry at the end of JOURNAL.md for the latest user prompt: "generate the code explorer site for this project". Use the repository-required journal template from .github/agents/journal-logger.agent.md, include timestamp, concise summary of work (code explorer generation), rationale, and note outputs generated. Preserve chronological order and formatting consistency.
 
-### 13-04-2026 14:48
-- **Prompt**: This used to be lab 8 and connected to lab8 github repo. I have made a lab 10 repo and want to connect this folder with lab 10. here is the code:  git remote add origin https://github.com/JustinDCosta/lab10-updated-pygame.git git branch -M main git push -u origin main
-
-### 13-04-2026 14:49
-- **Prompt**: Append a new entry to JOURNAL.md for this interaction (date April 13, 2026). Include: user asked to connect local folder from lab8 repo to new lab10 repo, checked git remotes/branch/status, found existing origin to lab8, used git remote set-url origin https://github.com/JustinDCosta/lab10-updated-pygame.git, ensured main branch, pushed with upstream successfully, verified remote now points to lab10. Mention that working tree had unrelated unstaged changes and no code files were edited by assistant.
+### 14-04-2026 12:24
+- **Prompt**: Use typehints for the main.py. I have updated the code so as to implement the feature of lifespan and rebirth feature for the circles. I want you to check the code out.
 
