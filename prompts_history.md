@@ -104,3 +104,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 14-04-2026 14:26
 - **Prompt**: regenerate the code explorer site
 
+### 14-04-2026 14:27
+- **Prompt**: Regenerate the code explorer site for this workspace. Analyze the Python source files and produce/update a single combined-depth HTML dashboard at docs/code_explorer.html. Ensure links and sections are coherent for this repo and reflect the current codebase. Return a concise summary of what was regenerated and any notable changes.
+
