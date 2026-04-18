@@ -58,9 +58,8 @@ This changes direction while mostly preserving speed magnitude.
 
 ## Project Files
 - [main.py](main.py): simulation logic, physics, rendering, game loop.
-- [test_main.py](test_main.py): automated tests for current circle implementation.
-- [REPORT.md](REPORT.md): report document.
-- [JOURNAL.md](JOURNAL.md): change and interaction log.
+- [REPORT.md](REPORT.md): project development report and AI workflow analysis.
+- [JOURNAL.md](JOURNAL.md): interaction and change log.
 
 ## Requirements
 - Python 3.10+

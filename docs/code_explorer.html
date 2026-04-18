@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Explorer - main.py</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #1e1e2e;
+  --surface: #2a2a3e;
+  --surface2: #313148;
+  --text: #cdd6f4;
+  --muted: #a6adc8;
+  --accent: #89b4fa;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --mono: 'Courier New', Courier, monospace;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
+a { color: var(--accent); }
+a:hover { text-decoration: underline; }
+header { padding: 1.5rem 2rem; border-bottom: 1px solid #3a3a55; background: var(--surface); }
+header h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: -0.3px; }
+header p { color: var(--muted); font-size: 0.88rem; margin-top: 0.2rem; }
+header .file-badge { display: inline-block; background: var(--surface2); border-radius: 4px; padding: 0.1rem 0.5rem; font-family: var(--mono); font-size: 0.8rem; color: var(--yellow); margin-top: 0.3rem; }
+.tab-nav { display: flex; padding: 0 2rem; background: var(--surface); border-bottom: 1px solid #3a3a55; flex-wrap: wrap; gap: 0; }
+.tab-btn { padding: 0.75rem 1.2rem; cursor: pointer; border: none; background: none; color: var(--muted); font-size: 0.88rem; border-bottom: 2px solid transparent; transition: all 0.18s; white-space: nowrap; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-panel { display: none; padding: 2rem; max-width: 1280px; margin: 0 auto; }
+.tab-panel.active { display: block; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #3a3a55; }
+.card h3 { color: var(--accent); margin-bottom: 0.6rem; font-size: 1rem; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+.arch-subnav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.arch-btn { padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid #444; background: none; color: var(--muted); cursor: pointer; font-size: 0.82rem; transition: all 0.18s; }
+.arch-btn:hover { border-color: var(--accent); color: var(--text); }
+.arch-btn.active { background: var(--accent); color: #1e1e2e; border-color: var(--accent); font-weight: 600; }
+.arch-panel { display: none; }
+.arch-panel.active { display: block; }
+.diag-container { background: var(--surface2); border-radius: var(--radius); padding: 1.5rem; min-height: 280px; overflow-x: auto; display: flex; justify-content: center; align-items: flex-start; }
+.diag-container svg { max-width: 100%; height: auto; }
+.diag-title { color: var(--accent); font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem; }
+.diag-caption { color: var(--muted); font-size: 0.82rem; margin-top: 0.75rem; font-style: italic; border-left: 2px solid #444; padding-left: 0.6rem; }
+.pattern-card { background: var(--surface2); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; border: 1px solid #3a3a55; }
+.pattern-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.pattern-icon { font-size: 1.1rem; }
+.pattern-title { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+.pattern-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.75rem; }
+.pattern-layers { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.6rem; }
+.layer { font-size: 0.8rem; padding: 0.28rem 0.6rem; border-radius: 4px; line-height: 1.4; }
+.layer-basics { background: #1e3a2a; color: #a6e3a1; }
+.layer-eng { background: #3a2e1a; color: #f9e2af; }
+.layer-arch { background: #1a2a3e; color: #89b4fa; }
+.layer-label { font-weight: 700; margin-right: 0.35rem; }
+.ext-link { display: inline-block; font-size: 0.8rem; color: var(--accent); text-decoration: none; margin-top: 0.2rem; }
+.fix-hint { background: #1e1e2e; border-left: 3px solid var(--yellow); padding: 0.4rem 0.7rem; border-radius: 0 4px 4px 0; font-size: 0.8rem; color: var(--text); margin-top: 0.5rem; }
+.badge { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 12px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px; }
+.badge-high { background: #4a1a2a; color: var(--red); }
+.badge-medium { background: #3e2e10; color: var(--yellow); }
+.badge-low { background: #1a3220; color: var(--green); }
+.badge-score { background: var(--surface2); color: var(--accent); font-size: 1rem; font-weight: 700; padding: 0.3rem 0.8rem; border: 1px solid var(--accent); border-radius: var(--radius); }
+.type-banner { display: flex; align-items: center; gap: 1.2rem; padding: 1.1rem 1.5rem; background: var(--surface2); border-radius: var(--radius); margin-bottom: 1.5rem; border: 1px solid #3a3a55; }
+.score-big { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+.score-verdict { color: var(--muted); font-size: 0.88rem; }
+.review-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
+@media (max-width: 800px) { .review-layout { grid-template-columns: 1fr; } }
+.review-left { background: var(--surface); border-radius: var(--radius); padding: 1.1rem; border: 1px solid #3a3a55; }
+.review-right { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid #3a3a55; min-height: 320px; }
+.review-item { padding: 0.7rem 0.8rem; border-radius: 6px; cursor: pointer; margin-bottom: 0.5rem; border: 1px solid transparent; transition: all 0.15s; }
+.review-item:hover { border-color: #444; background: var(--surface2); }
+.review-item.selected { border-color: var(--accent); background: var(--surface2); }
+.ri-titlerow { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.ri-title { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.ri-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+pre.snippet { background: #12121e; border-radius: 5px; padding: 0.7rem; font-size: 0.76rem; overflow-x: auto; color: #cdd6f4; font-family: var(--mono); margin: 0.6rem 0; line-height: 1.5; border: 1px solid #2a2a3e; }
+.detail-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.9rem; }
+.detail-title { color: var(--accent); font-size: 1rem; font-weight: 700; }
+.detail-body { color: var(--muted); font-size: 0.86rem; line-height: 1.65; margin-bottom: 0.9rem; }
+.hint-box { background: var(--surface2); border-left: 3px solid var(--accent); padding: 0.6rem 0.8rem; border-radius: 0 4px 4px 0; font-size: 0.84rem; color: var(--text); }
+.perf-card { background: var(--surface2); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; border: 1px solid #3a3a55; }
+.perf-title { font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+.perf-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.ns-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.2rem; background: var(--surface2); border-radius: var(--radius); margin-bottom: 0.8rem; border: 1px solid #3a3a55; }
+.ns-num { font-size: 1.4rem; font-weight: 800; color: var(--accent); min-width: 2rem; line-height: 1.2; }
+.ns-text a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+.ns-desc { color: var(--muted); font-size: 0.83rem; margin-top: 0.2rem; }
+.fallback { background: #2a1215; color: var(--red); padding: 1rem; border-radius: 6px; font-size: 0.72rem; font-family: var(--mono); overflow-x: auto; white-space: pre-wrap; }
+.section-head { font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; }
+.section-head.green { color: var(--green); }
+.section-head.yellow { color: var(--yellow); }
+.section-head.red { color: var(--red); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Code Explorer</h1>
+  <span class="file-badge">main.py</span>
+  <p style="margin-top:0.4rem;">Combined-depth walkthrough of current circle simulation architecture, data flow, and quality signals.</p>
+</header>
+<nav class="tab-nav">
+<button class="tab-btn active" onclick="switchTab('architecture', this)">Architecture</button>
+<button class="tab-btn" onclick="switchTab('patterns', this)">Patterns</button>
+<button class="tab-btn" onclick="switchTab('typehints', this)">Type Hints</button>
+<button class="tab-btn" onclick="switchTab('codereview', this)">Code Review</button>
+<button class="tab-btn" onclick="switchTab('performance', this)">Performance</button>
+<button class="tab-btn" onclick="switchTab('nextsteps', this)">Next Steps</button>
+</nav>
+<div class="tab-panel active" id="tab-architecture"><div class="card"><h3>Architecture Walkthrough</h3>
+<p style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">The run loop updates lifecycle, force, and motion systems per frame, then draws circles and FPS text. Circle lifecycle uses age and lifespan to rebirth in place while maintaining population size.</p>
+<div class="arch-subnav">
+<button class="arch-btn active" onclick="switchArch('callmap', this)">Call Graph</button>
+<button class="arch-btn" onclick="switchArch('deps', this)">Dependencies</button>
+<button class="arch-btn" onclick="switchArch('fullseq', this)">Full Sequence</button>
+<button class="arch-btn" onclick="switchArch('seqframe', this)">Frame Flow</button>
+<button class="arch-btn" onclick="switchArch('seqlife', this)">Lifespan Flow</button>
+<button class="arch-btn" onclick="switchArch('flowcircles', this)">Data circles</button>
+<button class="arch-btn" onclick="switchArch('flowdt', this)">Data dt</button>
+<button class="arch-btn" onclick="switchArch('flowage', this)">Data age</button>
+<button class="arch-btn" onclick="switchArch('state', this)">State Model</button>
+</div>
+<div class="arch-panel active" id="arch-callmap"><div class="diag-title">Call Graph</div><div class="diag-container" id="diag-callmap"></div><div class="diag-caption">run orchestrates update and draw layers while helper functions isolate physics and rendering behavior.</div></div>
+<div class="arch-panel" id="arch-deps"><div class="diag-title">Dependency Graph</div><div class="diag-container" id="diag-deps"></div><div class="diag-caption">main.py depends on pygame and Python stdlib modules for math randomness typing and dataclasses.</div></div>
+<div class="arch-panel" id="arch-fullseq"><div class="diag-title">Full Sequence</div><div class="diag-container" id="diag-fullseq"></div><div class="diag-caption">Each frame reads events, computes dt, updates world state, draws layers, and flips display.</div></div>
+<div class="arch-panel" id="arch-seqframe"><div class="diag-title">Frame Flow Sequence</div><div class="diag-container" id="diag-seqframe"></div><div class="diag-caption">Update order is lifecycle, then force application, then motion integration and overlap stabilization.</div></div>
+<div class="arch-panel" id="arch-seqlife"><div class="diag-title">Lifespan Sequence</div><div class="diag-container" id="diag-seqlife"></div><div class="diag-caption">Aging exceeds lifespan and triggers immediate replacement with a fresh circle at same list slot.</div></div>
+<div class="arch-panel" id="arch-flowcircles"><div class="diag-title">Data Flow circles</div><div class="diag-container" id="diag-flowcircles"></div><div class="diag-caption">circles is created once, then continuously mutated by lifecycle force motion and draw phases.</div></div>
+<div class="arch-panel" id="arch-flowdt"><div class="diag-title">Data Flow dt</div><div class="diag-container" id="diag-flowdt"></div><div class="diag-caption">dt scales aging, repel acceleration, movement integration, and jitter probability every frame.</div></div>
+<div class="arch-panel" id="arch-flowage"><div class="diag-title">Data Flow age</div><div class="diag-container" id="diag-flowage"></div><div class="diag-caption">age increases until threshold then resets through replacement circle creation.</div></div>
+<div class="arch-panel" id="arch-state"><div class="diag-title">State Model</div><div class="diag-container" id="diag-state"></div><div class="diag-caption">Circle state alternates active simulation and rebirth events driven by lifespan checks.</div></div>
+</div></div>
+<div class="tab-panel" id="tab-patterns"><div class="two-col"><div class="card"><div class="section-head green">Good Patterns</div>
+<div class="pattern-card"><div class="pattern-header"><span class="pattern-icon">&#9989;</span><span class="pattern-title">Separated Update Systems</span></div><div class="pattern-desc">Lifecycle, forces, and motion are split into dedicated functions with one orchestrator.</div><div class="pattern-layers"><div class="layer layer-basics"><span class="layer-label">Basics:</span>Smaller functions are easier to follow.</div><div class="layer layer-eng"><span class="layer-label">Engineering Insight:</span>Ordered phases reduce hidden side effects.</div><div class="layer layer-arch"><span class="layer-label">Architecture Insight:</span>This pattern scales feature additions.</div></div><a class="ext-link" href="https://refactoring.guru/smells/long-method" target="_blank" rel="noopener">Refactor long methods</a></div>
+<div class="pattern-card"><div class="pattern-header"><span class="pattern-icon">&#9989;</span><span class="pattern-title">Spatial Grid Reuse</span></div><div class="pattern-desc">One grid helper supports neighbor lookup in overlap and repel behavior.</div><div class="pattern-layers"><div class="layer layer-basics"><span class="layer-label">Basics:</span>Nearby-only checks are faster.</div><div class="layer layer-eng"><span class="layer-label">Engineering Insight:</span>Shared helper avoids repeated logic.</div><div class="layer layer-arch"><span class="layer-label">Architecture Insight:</span>Broad phase logic is isolated.</div></div><a class="ext-link" href="https://en.wikipedia.org/wiki/Spatial_hashing" target="_blank" rel="noopener">Spatial hashing</a></div>
+<div class="pattern-card"><div class="pattern-header"><span class="pattern-icon">&#9989;</span><span class="pattern-title">Typed Circle Model</span></div><div class="pattern-desc">Dataclass fields and function signatures clearly describe circle state and flow.</div><div class="pattern-layers"><div class="layer layer-basics"><span class="layer-label">Basics:</span>Types document expected values.</div><div class="layer layer-eng"><span class="layer-label">Engineering Insight:</span>Static tools catch mismatches early.</div><div class="layer layer-arch"><span class="layer-label">Architecture Insight:</span>Data contracts stay explicit.</div></div><a class="ext-link" href="https://docs.python.org/3/library/dataclasses.html" target="_blank" rel="noopener">Dataclass docs</a></div>
+</div><div class="card"><div class="section-head yellow">Potential Issues</div>
+<div class="pattern-card"><div class="pattern-header"><span class="pattern-icon">&#9888;&#65039;</span><span class="pattern-title">Dense Pair Cost</span></div><div class="pattern-desc">When many circles occupy nearby cells, interaction work still grows quickly.</div><div class="pattern-layers"><div class="layer layer-basics"><span class="layer-label">Basics:</span>High counts can drop FPS.</div><div class="layer layer-eng"><span class="layer-label">Engineering Insight:</span>Solver passes multiply pair checks.</div><div class="layer layer-arch"><span class="layer-label">Architecture Insight:</span>Adaptive pass limits can help.</div></div><div class="fix-hint">Hint: stop early based on remaining overlap ratio.</div></div>
+<div class="pattern-card"><div class="pattern-header"><span class="pattern-icon">&#9888;&#65039;</span><span class="pattern-title">Any Fallback Type</span></div><div class="pattern-desc">gfxdraw uses Optional Any for fallback handling, which lowers type strictness.</div><div class="pattern-layers"><div class="layer layer-basics"><span class="layer-label">Basics:</span>Any hides some mistakes.</div><div class="layer layer-eng"><span class="layer-label">Engineering Insight:</span>Type checker cannot validate draw methods.</div><div class="layer layer-arch"><span class="layer-label">Architecture Insight:</span>A typed adapter improves long term safety.</div></div><div class="fix-hint">Hint: wrap draw backend with a small typed protocol.</div></div>
+</div></div></div>
+<div class="tab-panel" id="tab-typehints"><div class="type-banner"><div class="score-big">4 / 5</div><div class="score-verdict">Strong typing across circle model and system functions, with minor precision gap around optional gfxdraw import typing.</div></div>
+<div class="two-col"><div class="card"><div class="section-head green">Strengths</div><div class="pattern-card"><div class="pattern-title">Full Dataclass Field Types</div><div class="pattern-desc">Circle has explicit field annotations for movement, color, and lifecycle values.</div></div><div class="pattern-card"><div class="pattern-title">Function Signatures Stay Consistent</div><div class="pattern-desc">Helpers consistently annotate parameters and return types including list Circle and float dt.</div></div></div><div class="card"><div class="section-head red">Gaps</div><div class="pattern-card"><div class="pattern-title">Optional Any Fallback</div><div class="pattern-desc">Import fallback for gfxdraw uses Any, reducing static validation coverage.</div></div><div class="pattern-card"><div class="pattern-title">Mixed Local Type Style</div><div class="pattern-desc">Some local containers are explicit while others rely on inference.</div></div></div></div></div>
+<div class="tab-panel" id="tab-codereview"><div class="review-layout"><div class="review-left" id="review-list">
+<div class="review-item" id="ri-0" onclick="selectReview(0)"><div class="ri-titlerow"><div class="ri-title">Dense Overlap Solver Cost</div><span class="badge badge-medium">medium</span></div><div class="ri-note">Fixed solver pass count can be expensive.</div></div>
+<div class="review-item" id="ri-1" onclick="selectReview(1)"><div class="ri-titlerow"><div class="ri-title">Identity Keyed Force Maps</div><span class="badge badge-medium">medium</span></div><div class="ri-note">id keyed maps add overhead each frame.</div></div>
+<div class="review-item" id="ri-2" onclick="selectReview(2)"><div class="ri-titlerow"><div class="ri-title">Lifecycle Rebirth Correctness</div><span class="badge badge-low">low</span></div><div class="ri-note">In place replacement preserves list shape.</div></div>
+<div class="review-item" id="ri-3" onclick="selectReview(3)"><div class="ri-titlerow"><div class="ri-title">Time Scaled Jitter</div><span class="badge badge-low">low</span></div><div class="ri-note">Jitter chance scales by dt baseline.</div></div>
+<div class="review-item" id="ri-4" onclick="selectReview(4)"><div class="ri-titlerow"><div class="ri-title">Draw Backend Type Safety</div><span class="badge badge-low">low</span></div><div class="ri-note">Optional Any can be refined via protocol.</div></div>
+</div><div class="review-right" id="review-detail-panel"></div></div></div>
+<div class="tab-panel" id="tab-performance"><div class="two-col"><div class="card"><div class="section-head green">Wins</div><div class="perf-card"><div class="perf-title">Spatial Grid Partition</div><div class="perf-desc">Broad phase grid limits many far pair checks in both major interaction systems.</div></div><div class="perf-card"><div class="perf-title">Early Distance Rejection</div><div class="perf-desc">Squared distance tests skip expensive square roots for non nearby circles.</div></div></div><div class="card"><div class="section-head red">Risks</div><div class="perf-card"><div class="perf-title">Dense Cell Pair Explosion</div><div class="perf-desc">When many circles cluster, local pair work still trends toward quadratic behavior.</div></div><div class="perf-card"><div class="perf-title">Fixed Stabilize Iterations</div><div class="perf-desc">Repeated overlap passes can consume frame budget in crowded scenarios.</div></div></div></div><div style="margin-top:0.8rem;"><span class="badge-score">5 / 6</span><span style="margin-left:0.8rem;color:var(--muted);">Verdict: good local optimizations, dense overlap solving remains the main scaling risk.</span></div></div>
+<div class="tab-panel" id="tab-nextsteps"><div class="card"><h3>Learning Links</h3><div class="ns-item"><div class="ns-num">1</div><div class="ns-text"><a href="https://www.pygame.org/docs/" target="_blank" rel="noopener">Pygame docs</a><div class="ns-desc">Reference for rendering loop timing and event handling in this project.</div></div></div><div class="ns-item"><div class="ns-num">2</div><div class="ns-text"><a href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener">Python typing docs</a><div class="ns-desc">Improve annotation precision for optional backends and helper containers.</div></div></div><div class="ns-item"><div class="ns-num">3</div><div class="ns-text"><a href="https://docs.python.org/3/library/dataclasses.html" target="_blank" rel="noopener">Dataclasses docs</a><div class="ns-desc">Deepen understanding of field defaults and model-centric design.</div></div></div><div class="ns-item"><div class="ns-num">4</div><div class="ns-text"><a href="https://en.wikipedia.org/wiki/Collision_detection" target="_blank" rel="noopener">Collision detection</a><div class="ns-desc">Conceptual grounding for overlap solving and neighbor checking choices.</div></div></div><div class="ns-item"><div class="ns-num">5</div><div class="ns-text"><a href="https://refactoring.guru/extract-method" target="_blank" rel="noopener">Extract method guide</a><div class="ns-desc">Useful for further decomposition if simulation complexity continues to grow.</div></div></div></div></div>
+<script>
+function switchTab(name, btn) { document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + name).classList.add('active'); btn.classList.add('active'); }
+function switchArch(name, btn) { document.querySelectorAll('.arch-panel').forEach(p => p.classList.remove('active')); document.querySelectorAll('.arch-btn').forEach(b => b.classList.remove('active')); document.getElementById('arch-' + name).classList.add('active'); btn.classList.add('active'); }
+const reviewItems = [
+{id:0,title:'Dense Overlap Solver Cost',severity:'medium',snippet:'for _ in range(OVERLAP_SOLVER_PASSES):\n    changed = _resolve_overlaps(circles)\n    if not changed:\n        break',shortNote:'Fixed passes can be expensive in dense scenes.',fullExplanation:'The overlap loop improves correctness but repeated passes can increase cost when many circles remain in contact.',improvementHint:'Introduce adaptive pass count based on overlap density or frame budget.'},
+{id:1,title:'Identity Keyed Force Maps',severity:'medium',snippet:'force_x = {id(c): 0.0 for c in circles}\nforce_y = {id(c): 0.0 for c in circles}',shortNote:'Per frame id keyed maps add overhead.',fullExplanation:'Using id keys is valid but less cache friendly and harder to inspect than index based buffers for fixed lists.',improvementHint:'Use parallel force arrays aligned to circle indices.'},
+{id:2,title:'Lifecycle Rebirth Correctness',severity:'low',snippet:'if circles[i].age >= circles[i].lifespan:\n    circles[i] = create_random_circle()',shortNote:'In place replacement preserves list shape.',fullExplanation:'This keeps population size constant and avoids list reallocation or index churn during frame updates.',improvementHint:'Optionally track rebirth metrics for balancing simulation parameters.'},
+{id:3,title:'Time Scaled Jitter',severity:'low',snippet:'if random.random() < JITTER_CHANCE * (dt * 60.0):\n    angle = random.uniform(JITTER_ANGLE_MIN, JITTER_ANGLE_MAX)',shortNote:'Jitter scales with dt baseline.',fullExplanation:'Scaling random turn chance by dt helps keep behavior more consistent across varying frame rates.',improvementHint:'Make baseline factor a named constant for explicit tuning.'},
+{id:4,title:'Draw Backend Type Safety',severity:'low',snippet:'gfxdraw: Optional[Any]\ntry:\n    import pygame.gfxdraw as gfxdraw',shortNote:'Optional Any limits static checking.',fullExplanation:'The fallback is robust for runtime portability but hides type mistakes in draw backend calls.',improvementHint:'Define a small protocol interface for draw backend functions.'}
+];
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function selectReview(id) { document.querySelectorAll('.review-item').forEach(el => el.classList.remove('selected')); document.getElementById('ri-' + id).classList.add('selected'); const item = reviewItems[id]; const sevClass = 'badge-' + item.severity; const body = item.fullExplanation.replace(/\n/g, '<br>'); document.getElementById('review-detail-panel').innerHTML = `<div><div class="detail-head"><span class="detail-title">${escH(item.title)}</span><span class="badge ${escH(sevClass)}">${escH(item.severity)}</span></div><div class="detail-body">${body}</div><pre class="snippet">${escH(item.snippet)}</pre><div class="hint-box">&#128161; <strong>Improvement:</strong> ${escH(item.improvementHint)}</div></div>`; }
+mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+const diagrams = {
+callmap: String.raw`graph TD
+n1[run main loop] --> n2[event poll step]
+n1 --> n3[clock tick step]
+n1 --> n4[update circles step]
+n1 --> n5[draw background pass]
+n1 --> n6[draw circles pass]
+n1 --> n7[fps overlay draw]
+n1 --> n8[display flip step]
+n4 --> n9[lifecycle system]
+n4 --> n10[force system]
+n4 --> n11[motion system]
+n10 --> n12[magnetic repel]
+n11 --> n13[stabilize overlaps]
+n13 --> n14[resolve overlaps]`,
+deps: String.raw`graph LR
+n1[main module] --> n2[pygame package]
+n1 --> n3[math module]
+n1 --> n4[random module]
+n1 --> n5[dataclasses module]
+n1 --> n6[typing module]
+click n2 href "https://www.pygame.org/docs/" "Open docs"
+click n3 href "https://docs.python.org/3/library/math.html" "Open docs"
+click n4 href "https://docs.python.org/3/library/random.html" "Open docs"
+click n5 href "https://docs.python.org/3/library/dataclasses.html" "Open docs"
+click n6 href "https://docs.python.org/3/library/typing.html" "Open docs"`,
+fullseq: String.raw`sequenceDiagram
+participant p1 as app
+participant p2 as clock
+participant p3 as world
+participant p4 as screen
+participant p5 as display
+p1->>p1: poll quit events
+p1->>p2: tick target fps
+p2-->>p1: return frame dt
+p1->>p3: update circles
+p3-->>p1: world ready
+p1->>p4: draw background
+p1->>p4: draw circles
+p1->>p4: draw fps text
+p1->>p5: flip display
+p5-->>p1: frame done`,
+seqframe: String.raw`sequenceDiagram
+participant p1 as update
+participant p2 as life
+participant p3 as force
+participant p4 as motion
+participant p5 as circles
+p1->>p2: run lifecycle
+p2->>p5: age and rebirth
+p2-->>p1: done lifecycle
+p1->>p3: run forces
+p3->>p5: apply repel
+p3-->>p1: done force
+p1->>p4: run motion
+p4->>p5: move and clamp
+p4-->>p1: done motion`,
+seqlife: String.raw`sequenceDiagram
+participant p1 as life
+participant p2 as circle
+participant p3 as factory
+participant p4 as pool
+p1->>p2: add age dt
+p2-->>p1: age value
+p1->>p1: compare lifespan
+alt lifespan reached
+  p1->>p3: create circle
+  p3-->>p1: fresh circle
+  p1->>p4: replace slot
+else lifespan not reached
+  p1->>p4: keep slot
+end
+p1-->>p4: lifecycle done`,
+flowcircles: String.raw`graph TD
+n1[create circles list] --> n2[lifecycle mutate step]
+n2 --> n3[force mutate step]
+n3 --> n4[motion mutate step]
+n4 --> n5[draw all circles]
+n5 --> n6[next frame reuse]`,
+flowdt: String.raw`graph TD
+n1[clock tick value] --> n2[dt frame value]
+n2 --> n3[lifecycle age step]
+n2 --> n4[repel force step]
+n2 --> n5[motion position step]
+n2 --> n6[jitter chance step]
+n6 --> n7[velocity rotate step]`,
+flowage: String.raw`graph TD
+n1[new circle age] --> n2[age plus dt]
+n2 --> n3[lifespan compare]
+n3 --> n4[replace circle]
+n3 --> n5[keep active]
+n4 --> n6[age reset zero]
+n5 --> n2`,
+state: String.raw`stateDiagram-v2
+s1: spawn active
+s2: force update
+s3: motion update
+s4: lifespan check
+s5: reborn active
+[*] --> s1
+s1 --> s2
+s2 --> s3
+s3 --> s4
+s4 --> s2
+s4 --> s5
+s5 --> s2`
+};
+let renderCounter = 0;
+async function renderDiagram(key, containerId) { const container = document.getElementById(containerId); if (!container) return; const source = diagrams[key]; if (!source) { container.innerHTML = '<p style="color:var(--muted)">No diagram source found.</p>'; return; } const uid = 'mmd-' + key + '-' + (++renderCounter); try { const { svg, bindFunctions } = await mermaid.render(uid, source); container.innerHTML = svg; if (typeof bindFunctions === 'function') bindFunctions(container); } catch (err) { container.innerHTML = '<pre class="fallback">Render failed: ' + err.message + '\n\nSource:\n' + source + '</pre>'; } }
+async function renderAll() { for (const [key] of Object.entries(diagrams)) { await renderDiagram(key, 'diag-' + key); } }
+window.addEventListener('DOMContentLoaded', () => { selectReview(0); renderAll(); });
+</script>
+</body>
+</html>
+<!--
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Explorer - main.py and test_main.py</title>
+<title>Code Explorer - main.py and test_main.py</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #1e1e2e;
+  --surface: #2a2a3e;
+  --surface2: #313148;
+  --text: #cdd6f4;
+  --muted: #a6adc8;
+  --accent: #89b4fa;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --mono: 'Courier New', Courier, monospace;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
+a { color: var(--accent); }
+a:hover { text-decoration: underline; }
+header { padding: 1.5rem 2rem; border-bottom: 1px solid #3a3a55; background: var(--surface); }
+header h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: -0.3px; }
+header p { color: var(--muted); font-size: 0.88rem; margin-top: 0.2rem; }
+header .file-badge { display: inline-block; background: var(--surface2); border-radius: 4px; padding: 0.1rem 0.5rem; font-family: var(--mono); font-size: 0.8rem; color: var(--yellow); margin-top: 0.3rem; }
+.tab-nav { display: flex; padding: 0 2rem; background: var(--surface); border-bottom: 1px solid #3a3a55; flex-wrap: wrap; gap: 0; }
+.tab-btn { padding: 0.75rem 1.2rem; cursor: pointer; border: none; background: none; color: var(--muted); font-size: 0.88rem; border-bottom: 2px solid transparent; transition: all 0.18s; white-space: nowrap; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-panel { display: none; padding: 2rem; max-width: 1280px; margin: 0 auto; }
+.tab-panel.active { display: block; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #3a3a55; }
+.card h3 { color: var(--accent); margin-bottom: 0.6rem; font-size: 1rem; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+.arch-subnav { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.arch-btn { padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid #444; background: none; color: var(--muted); cursor: pointer; font-size: 0.82rem; transition: all 0.18s; }
+.arch-btn:hover { border-color: var(--accent); color: var(--text); }
+.arch-btn.active { background: var(--accent); color: #1e1e2e; border-color: var(--accent); font-weight: 600; }
+.arch-panel { display: none; }
+.arch-panel.active { display: block; }
+.diag-container { background: var(--surface2); border-radius: var(--radius); padding: 1.5rem; min-height: 280px; overflow-x: auto; display: flex; justify-content: center; align-items: flex-start; }
+.diag-container svg { max-width: 100%; height: auto; }
+.diag-title { color: var(--accent); font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem; }
+.diag-caption { color: var(--muted); font-size: 0.82rem; margin-top: 0.75rem; font-style: italic; border-left: 2px solid #444; padding-left: 0.6rem; }
+.pattern-card { background: var(--surface2); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; border: 1px solid #3a3a55; }
+.pattern-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.pattern-icon { font-size: 1.1rem; }
+.pattern-title { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+.pattern-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.75rem; }
+.pattern-layers { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.6rem; }
+.layer { font-size: 0.8rem; padding: 0.28rem 0.6rem; border-radius: 4px; line-height: 1.4; }
+.layer-basics { background: #1e3a2a; color: #a6e3a1; }
+.layer-eng { background: #3a2e1a; color: #f9e2af; }
+.layer-arch { background: #1a2a3e; color: #89b4fa; }
+window.addEventListener('DOMContentLoaded', () => { selectReview(0); renderAll(); });
+</script>
+</body>
+</html>
+      <div class="section-head green">Strengths</div>
+      <div class="pattern-card">
+        <div class="pattern-title">Consistent Parameter Annotations</div>
+        <div class="pattern-desc">Core functions annotate circle objects, lists, and dt values clearly.</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-title">Concrete Generic Types</div>
+        <div class="pattern-desc">Containers like list[Circle] and tuple[int, int, int] improve readability for beginners.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-head red">Gaps</div>
+      <div class="pattern-card">
+        <div class="pattern-title">Partial Test Annotations</div>
+        <div class="pattern-desc">Some pytest fixture and monkeypatch parameters are untyped, reducing consistency.</div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-title">Any Fallback in Draw Path</div>
+        <div class="pattern-desc">gfxdraw fallback uses Any for import resilience, which weakens static type precision.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-codereview">
+  <div class="review-layout">
+    <div class="review-left" id="review-list">
+      <div class="review-item" id="ri-0" onclick="selectReview(0)">
+        <div class="ri-titlerow">
+          <div class="ri-title">Frame Rate Sensitive Jitter</div>
+          <span class="badge badge-medium">medium</span>
+        </div>
+        <div class="ri-note">Random jitter chance is per frame, not per second.</div>
+      </div>
+
+      <div class="review-item" id="ri-1" onclick="selectReview(1)">
+        <div class="ri-titlerow">
+          <div class="ri-title">Quadratic Pair Checks</div>
+          <span class="badge badge-medium">medium</span>
+        </div>
+        <div class="ri-note">Repel and overlap both run nested pair loops.</div>
+      </div>
+
+      <div class="review-item" id="ri-2" onclick="selectReview(2)">
+        <div class="ri-titlerow">
+          <div class="ri-title">Lifecycle Is Correct</div>
+          <span class="badge badge-low">low</span>
+        </div>
+        <div class="ri-note">Circle rebirth preserves population count and continuity.</div>
+      </div>
+
+      <div class="review-item" id="ri-3" onclick="selectReview(3)">
+        <div class="ri-titlerow">
+          <div class="ri-title">Test Isolation Strength</div>
+          <span class="badge badge-low">low</span>
+        </div>
+        <div class="ri-note">Autouse fixture stabilizes stochastic motion tests.</div>
+      </div>
+
+      <div class="review-item" id="ri-4" onclick="selectReview(4)">
+        <div class="ri-titlerow">
+          <div class="ri-title">Type Safety Opportunity</div>
+          <span class="badge badge-low">low</span>
+        </div>
+        <div class="ri-note">Optional typing wrapper could reduce Any usage.</div>
+      </div>
+    </div>
+
+    <div class="review-right" id="review-detail-panel"></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-performance">
+  <div class="two-col">
+    <div class="card">
+      <div class="section-head green">Wins</div>
+      <div class="perf-card">
+        <div class="perf-title">Vectorized Force Buffers</div>
+        <div class="perf-desc">Repel accumulates forces in arrays first, then applies once per circle, avoiding repeated velocity writes inside pair loops.</div>
+      </div>
+      <div class="perf-card">
+        <div class="perf-title">Early Radius Rejection</div>
+        <div class="perf-desc">Distance square checks skip far pairs quickly before expensive square root operations are used.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-head red">Risks</div>
+      <div class="perf-card">
+        <div class="perf-title">Nested Pair Loops</div>
+        <div class="perf-desc">Both overlap and repel are O n squared, and overlap is repeated up to OVERLAP_SOLVER_PASSES each frame.</div>
+        <div class="perf-desc">Multiple overlap solver passes improve quality but multiply the same pair checks under dense scenes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge-score">3 / 6</span>
+    <p style="margin-top:0.8rem;color:var(--muted);">Verdict: classroom scale performance is acceptable, but broad phase partitioning is the key next upgrade.</p>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-nextsteps">
+  <div class="card">
+    <h3>Curated Learning Links</h3>
+
+    <div class="ns-item">
+      <div class="ns-num">1</div>
+      <div class="ns-text">
+        <a href="https://www.pygame.org/docs/" target="_blank" rel="noopener">Pygame Documentation</a>
+        <div class="ns-desc">Reference for surfaces, event loop handling, and drawing primitives used in both app files.</div>
+      </div>
+    </div>
+
+    <div class="ns-item">
+      <div class="ns-num">2</div>
+      <div class="ns-text">
+        <a href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener">Python typing module</a>
+        <div class="ns-desc">Deepen type hint usage beyond basics and align fixture and protocol annotations.</div>
+      </div>
+    </div>
+
+    <div class="ns-item">
+      <div class="ns-num">3</div>
+      <div class="ns-text">
+        <a href="https://refactoring.guru/extract-method" target="_blank" rel="noopener">Extract Method refactor</a>
+        <div class="ns-desc">Useful for decomposing long frame loops into reusable simulation stages.</div>
+      </div>
+    </div>
+
+    <div class="ns-item">
+      <div class="ns-num">4</div>
+      <div class="ns-text">
+        <a href="https://en.wikipedia.org/wiki/Collision_detection" target="_blank" rel="noopener">Collision detection overview</a>
+        <div class="ns-desc">Background on broad phase and narrow phase strategies for scaling pairwise checks.</div>
+      </div>
+    </div>
+
+    <div class="ns-item">
+      <div class="ns-num">5</div>
+      <div class="ns-text">
+        <a href="https://en.wikipedia.org/wiki/Quadtree" target="_blank" rel="noopener">Quadtree fundamentals</a>
+        <div class="ns-desc">A practical spatial partition idea for reducing O(n squared) interaction costs.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// -- Tab switching --
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// -- Architecture sub-tabs --
+function switchArch(name, btn) {
+  document.querySelectorAll('.arch-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.arch-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('arch-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// -- Code Review --
+const reviewItems = [
+  {
+    id: 0,
+    title: 'Zero distance repel skip',
+    severity: 'high',
+    snippet: 'if distance_sq <= 1e-12:\n    continue',
+    shortNote: 'Potential correctness edge case in overlap repel handling.',
+    fullExplanation: 'In magnetic repel, exact same center points skip force application for that pair.\nIf many circles stack during initialization or dense movement, this can delay separation and produce sticky behavior for one frame.\nThe overlap solver helps, but repel itself has no fallback nudge in this edge case.',
+    improvementHint: 'Add a tiny deterministic or random direction push when distance is near zero so every close pair receives a valid separation vector.'
+  },
+  {
+    id: 1,
+    title: 'Long frame loop in v2',
+    severity: 'medium',
+    snippet: 'while running:\n    for event in pygame.event.get():\n        ...\n    sync_square_count(...)\n    apply_size_scale(...)\n    update_squares(...)\n    draw_background(...)\n    draw_squares(...)\n    draw_clock(...)\n    draw_overlay(...)',
+    shortNote: 'Maintainability risk as features continue to grow.',
+    fullExplanation: 'The run loop currently hosts input collection, config mutation, simulation, and rendering in one place.\nThis is readable now but becomes fragile as controls and behaviors expand.\nRefactoring into stage helpers would make bugs easier to isolate.',
+    improvementHint: 'Create input stage, world stage, and render stage helper functions and keep run as high level orchestration only.'
+  },
+  {
+    id: 2,
+    title: 'Pair checks each frame',
+    severity: 'medium',
+    snippet: 'for i in range(len(squares) - 1):\n    for j in range(i + 1, len(squares)):\n        _resolve_pair_collision(squares[i], squares[j])',
+    shortNote: 'Performance risk when entity counts scale up.',
+    fullExplanation: 'Both square collision and circle repel systems iterate all unique pairs, which is quadratic work per frame.\nCurrent counts are small enough for learning use, but MAX_SQUARE_COUNT and future tuning can expose frame drops.\nSpatial hashing or grids would reduce unnecessary far pair checks.',
+    improvementHint: 'Add a broad phase partition layer so narrow collision and force logic only runs for local neighbors.'
+  },
+  {
+    id: 3,
+    title: 'Fixture typing inconsistency',
+    severity: 'low',
+    snippet: '@pytest.fixture(autouse=True)\ndef disable_jitter_by_default(monkeypatch):\n    monkeypatch.setattr(app.random, "random", lambda: 1.0)',
+    shortNote: 'Type safety and editor assistance could be improved.',
+    fullExplanation: 'Application functions are strongly typed, but test fixtures use less explicit signatures.\nThis makes IDE static checks less precise compared to core modules.\nImproving fixture annotations keeps style consistency across code and tests.',
+    improvementHint: 'Annotate fixture arguments and return types using pytest fixture conventions and typing aliases where useful.'
+  },
+  {
+    id: 4,
+    title: 'Repeated clamp semantics',
+    severity: 'low',
+    snippet: 'def _clamp_position(circle: Circle) -> None:\n    ...\n\ndef _clamp_position(square: Square) -> None:\n    ...',
+    shortNote: 'Shared utility extraction can reduce future drift.',
+    fullExplanation: 'Main and v2 both maintain similar bound clamping logic with separate implementations.\nDuplicated semantics can diverge over time when one path is tuned and the other is forgotten.\nA shared geometry helper module would reduce drift and improve reuse.',
+    improvementHint: 'Extract small reusable clamp helpers in one module and parameterize by size and screen bounds.'
+  }
+];
+
+function escH(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function selectReview(id) {
+  document.querySelectorAll('.review-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('ri-' + id).classList.add('selected');
+  const item = reviewItems[id];
+  const sevClass = 'badge-' + item.severity;
+  const body = item.fullExplanation.replace(/\n/g, '<br>');
+  document.getElementById('review-detail-panel').innerHTML = `
+    <div>
+      <div class="detail-head">
+        <span class="detail-title">${escH(item.title)}</span>
+        <span class="badge ${escH(sevClass)}">${escH(item.severity)}</span>
+      </div>
+      <div class="detail-body">${body}</div>
+      <pre class="snippet">${escH(item.snippet)}</pre>
+      <div class="hint-box">&#128161; <strong>Improvement:</strong> ${escH(item.improvementHint)}</div>
+    </div>`;
+}
+
+// -- Mermaid --
+mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+const diagrams = {
+  callgraph: String.raw`graph TD
+n1["main module"]
+n2["v2 module"]
+n3["test module"]
+n4["circle update"]
+n5["repel solver"]
+n6["draw stage"]
+n7["square update"]
+n8["collision pass"]
+n9["config input"]
+n10["test checks"]
+n1 --> n4
+n4 --> n5
+n4 --> n6
+n2 --> n9
+n9 --> n7
+n7 --> n8
+n2 --> n6
+n3 --> n1
+n3 --> n10`,
+  deps: String.raw`graph LR
+n1["main file"]
+n2["v2 file"]
+n3["test file"]
+n4["pygame lib"]
+n5["pytest lib"]
+n6["math lib"]
+n7["random lib"]
+n8["dataclass lib"]
+n1 --> n4
+n1 --> n6
+n1 --> n7
+n1 --> n8
+n2 --> n4
+n2 --> n7
+n2 --> n8
+n3 --> n1
+n3 --> n4
+n3 --> n5
+n3 --> n6
+n3 --> n7
+click n4 href "https://www.pygame.org/docs/" "Open docs"
+click n5 href "https://pypi.org/search/?q=pytest" "Open docs"
+click n6 href "https://docs.python.org/3/library/math.html" "Open docs"
+click n7 href "https://docs.python.org/3/library/random.html" "Open docs"
+click n8 href "https://docs.python.org/3/library/dataclasses.html" "Open docs"`,
+  fullseq: String.raw`sequenceDiagram
+participant p1 as runner
+participant p2 as input
+participant p3 as physics
+participant p4 as render
+p1->>p2: read frame events
+p2-->>p1: event batch
+p1->>p3: step world state
+p3->>p3: solve overlap pass
+p3->>p3: apply repel force
+p3-->>p1: world ready
+p1->>p4: draw scene frame
+p4-->>p1: frame complete`,
+  seqcore: String.raw`sequenceDiagram
+participant p1 as updater
+participant p2 as overlap
+participant p3 as repel
+participant p4 as mover
+p1->>p2: run first stabilize
+p2-->>p1: overlap fixed
+p1->>p3: apply pair forces
+p3-->>p1: velocity updated
+p1->>p4: move each circle
+p4-->>p1: positions updated
+p1->>p2: run second stabilize
+p2-->>p1: final positions`,
+  seqtest: String.raw`sequenceDiagram
+participant p1 as tests
+participant p2 as fixture
+participant p3 as app
+participant p4 as checks
+p1->>p2: init headless mode
+p2-->>p1: deterministic state
+p1->>p3: call update funcs
+p3-->>p1: new positions
+p1->>p4: assert bounds hold
+p4-->>p1: pass result`,
+  flowcircles: String.raw`graph TD
+n1["circles list"]
+n2["stabilize pass"]
+n3["repel update"]
+n4["circle move"]
+n5["draw circles"]
+n6["screen output"]
+n1 --> n2
+n2 --> n3
+n3 --> n4
+n4 --> n5
+n5 --> n6`,
+  flowsquares: String.raw`graph TD
+n1["squares list"]
+n2["count sync"]
+n3["size scale"]
+n4["move update"]
+n5["collision pass"]
+n6["draw blocks"]
+n7["screen output"]
+n1 --> n2
+n2 --> n3
+n3 --> n4
+n4 --> n5
+n5 --> n6
+n6 --> n7`,
+  flowconfig: String.raw`graph TD
+n1["config state"]
+n2["key handler"]
+n3["target values"]
+n4["update gates"]
+n5["overlay text"]
+n6["user feedback"]
+n1 --> n2
+n2 --> n3
+n3 --> n4
+n4 --> n5
+n5 --> n6`,
+  flowdt: String.raw`graph TD
+n1["frame clock"]
+n2["dt value"]
+n3["velocity step"]
+n4["position step"]
+n5["boundary check"]
+n6["smooth motion"]
+n1 --> n2
+n2 --> n3
+n3 --> n4
+n4 --> n5
+n5 --> n6`,
+  keyflow: String.raw`graph TD
+n1["key press"]
+n2["handle key"]
+n3["clamp values"]
+n4["config state"]
+n5["next frame"]
+n1 --> n2
+n2 --> n3
+n3 --> n4
+n4 --> n5`
+};
+
+let renderCounter = 0;
+
+async function renderDiagram(key, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const source = diagrams[key];
+  if (!source) { container.innerHTML = '<p style="color:var(--muted)">No diagram source found.</p>'; return; }
+  const uid = 'mmd-' + key + '-' + (++renderCounter);
+  try {
+    const { svg, bindFunctions } = await mermaid.render(uid, source);
+    container.innerHTML = svg;
+    if (typeof bindFunctions === 'function') bindFunctions(container);
+  } catch (err) {
+    container.innerHTML = '<pre class="fallback">Render failed: ' + err.message + '\n\nSource:\n' + source + '</pre>';
+  }
+}
+
+async function renderAll() {
+  for (const [key] of Object.entries(diagrams)) {
+    await renderDiagram(key, 'diag-' + key);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  selectReview(0);
+  renderAll();
+});
+</script>
+</body>
+</html>
