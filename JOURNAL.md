@@ -528,3 +528,19 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 14-04-2026 14:27
 - **Prompt**: Regenerate the code explorer site for this workspace. Analyze the Python source files and produce/update a single combined-depth HTML dashboard at docs/code_explorer.html. Ensure links and sections are coherent for this repo and reflect the current codebase. Return a concise summary of what was regenerated and any notable changes.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 14-04-2026 14:38
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Regenerate the code explorer site for this workspace. Analyze the Python source files and produce/update a single combined-depth HTML dashboard at docs/code_explorer.html. Ensure links and sections are coherent for this repo and reflect the current codebase. Return a concise summary of what was regenerated and any notable changes.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Regenerated docs/code_explorer.html with updated architecture, diagrams, patterns, type-hint scoring, code-review items, performance analysis, and curated resources based on current main.py.
+- **Context and Reasons for Changes**: User requested a fresh combined-depth Code Explorer dashboard reflecting the latest Python codebase and coherent repo-specific links/sections.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 18-04-2026 13:56
+- **Prompt**: Do a full analysis and check out the whole project and then update the readme  file accordingly. Also, in the main.py there are a few stubs and other comments which  makes the code look unprofessional, therefore update those with simplified comments(wherever necessary). After, commit(with appropriate message) and push to git.

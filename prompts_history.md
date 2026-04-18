@@ -107,3 +107,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 14-04-2026 14:27
 - **Prompt**: Regenerate the code explorer site for this workspace. Analyze the Python source files and produce/update a single combined-depth HTML dashboard at docs/code_explorer.html. Ensure links and sections are coherent for this repo and reflect the current codebase. Return a concise summary of what was regenerated and any notable changes.
 
+### 18-04-2026 13:56
+- **Prompt**: Do a full analysis and check out the whole project and then update the readme  file accordingly. Also, in the main.py there are a few stubs and other comments which  makes the code look unprofessional, therefore update those with simplified comments(wherever necessary). After, commit(with appropriate message) and push to git.
+
