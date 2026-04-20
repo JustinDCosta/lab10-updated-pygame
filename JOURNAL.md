@@ -640,3 +640,73 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 20-04-2026 13:51
 - **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+
+### Entry by justin.d-costa@epita.fr - 20-04-2026 13:56
+- **Agent Version**: 2.3
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Prompt**: "Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none."
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big); big set to 3x baseline. Circle creation now uses explicit size options, and CIRCLE_MAX_RADIUS is derived from these to maintain physics/grid logic. Validation confirms no errors in main.py.
+- **Context and Reasons for Changes**: These changes ensure consistency in physics and grid logic while providing explicit size options, improving maintainability and predictability of circle properties.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 13:59
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big), with big set to 3x the small/current baseline; circle creation now chooses from explicit size options; CIRCLE_MAX_RADIUS now derives from those options; validated main.py and found no errors.
+- **Context and Reasons for Changes**: Keeps circle-size configuration explicit while preserving existing physics/grid behavior by deriving max radius from shared options, reducing drift risk and keeping logic intact.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 14:00
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big), with big set to 3x the small/current baseline; circle creation now chooses from explicit size options; CIRCLE_MAX_RADIUS now derives from those options; validated main.py and found no errors.
+- **Context and Reasons for Changes**: Keeps circle-size configuration explicit while preserving existing physics/grid behavior by deriving max radius from shared options, reducing drift risk and keeping logic intact.
+
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 14:00
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big), with big set to 3x the small/current baseline; circle creation now chooses from explicit size options; CIRCLE_MAX_RADIUS now derives from those options; validated main.py and found no errors.
+- **Context and Reasons for Changes**: Keeps circle-size configuration explicit while preserving existing physics/grid behavior by deriving max radius from shared options, reducing drift risk and keeping logic intact.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 14:00
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big), with big set to 3x the small/current baseline; circle creation now chooses from explicit size options; CIRCLE_MAX_RADIUS now derives from those options; validated main.py and found no errors.
+- **Context and Reasons for Changes**: Keeps circle-size configuration explicit while preserving existing physics/grid behavior by deriving max radius from shared options, reducing drift risk and keeping logic intact.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 14:00
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: main.py updated to support three default circle sizes (small, medium, big), with big set to 3x the small/current baseline; circle creation now chooses from explicit size options; CIRCLE_MAX_RADIUS now derives from those options; validated main.py and found no errors.
+- **Context and Reasons for Changes**: Keeps circle-size configuration explicit while preserving existing physics/grid behavior by deriving max radius from shared options, reducing drift risk and keeping logic intact.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 20-04-2026 14:06
+- **Prompt**: I have changed the sizes manually so as to make it look better and also the count is now set to 20. I would like for you to go throught the code again and tell me if anything is wrong. Also, add and edit comments in all important places so as to help any other programmer understand the code when he/she views it.

@@ -128,3 +128,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 20-04-2026 13:51
 - **Prompt**: Append a new chronological entry at the end of JOURNAL.md for this interaction using the repository's required template from .github/agents/journal-logger.agent.md. Include timestamp (April 20, 2026 context), summarize that main.py was updated to support three default circle sizes (small, medium, big), big set to 3x small/current baseline, circle creation now chooses from explicit size options, and CIRCLE_MAX_RADIUS now derives from those options to keep physics/grid logic intact. Mention validation: checked for errors in main.py and found none.
 
+### 20-04-2026 14:06
+- **Prompt**: I have changed the sizes manually so as to make it look better and also the count is now set to 20. I would like for you to go throught the code again and tell me if anything is wrong. Also, add and edit comments in all important places so as to help any other programmer understand the code when he/she views it.
+
