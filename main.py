@@ -19,11 +19,19 @@ SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
 FPS: int = 60
 
-CIRCLE_COUNT: int = 30  # Number of circles to simulate
-CIRCLE_MIN_RADIUS: int = 8   
-CIRCLE_MAX_RADIUS: int = 25  
+# Circle population and size tiers used by random spawning.
+CIRCLE_COUNT: int = 20 
+CIRCLE_SMALL_RADIUS: int = 8
+CIRCLE_MEDIUM_RADIUS: int = (CIRCLE_SMALL_RADIUS * 2)
+CIRCLE_BIG_RADIUS: int = (CIRCLE_SMALL_RADIUS * 3)
+CIRCLE_SIZE_OPTIONS: tuple[int, int, int] = (
+    CIRCLE_SMALL_RADIUS,
+    CIRCLE_MEDIUM_RADIUS,
+    CIRCLE_BIG_RADIUS,
+)
+CIRCLE_MAX_RADIUS: int = max(CIRCLE_SIZE_OPTIONS)
 
-# Drastically reduced speeds so it looks smooth and readable
+# Velocity and steering caps.
 SPEED_MIN: int = 15        
 SPEED_MAX: int = 40
 GLOBAL_MAX_SPEED: float = 180.0  
@@ -34,32 +42,34 @@ JITTER_CHANCE: float = 0.05
 JITTER_ANGLE_MIN: float = -0.1
 JITTER_ANGLE_MAX: float = 0.1
 
-# Magnetic repel values
-MAGNETIC_RADIUS: float = 180.0  # How far away they detect each other
-MAGNETIC_FORCE: float = 800.0   # How hard they push away
+# Interaction tuning for repulsion/collision settling.
+MAGNETIC_RADIUS: float = 180.0  
+MAGNETIC_FORCE: float = 800.0   
 OVERLAP_SOLVER_PASSES: int = 8
+BASE_DAMPING_PER_60FPS_FRAME: float = 0.95
 
 
 @dataclass(slots=True)
 class Circle:
-    """Circle center position, velocity, and render color."""
+    """Represents a simulated entity with physics properties and a lifecycle."""
     x: float
     y: float
     vx: float
     vy: float
     color: tuple[int, int, int]
     radius: int
-    base_speed: float  # Normal wandering speed
-    lifespan: float    # random time before it dies
+    base_speed: float 
+    lifespan: float   
     max_speed: float = GLOBAL_MAX_SPEED
-    age: float = 0.0   # keeps track of how long it's been alive
+    age: float = 0.0  
 
 
 def create_random_circle() -> Circle:
-    """Create one circle at a random position with random velocity."""
-    radius = random.randint(CIRCLE_MIN_RADIUS, CIRCLE_MAX_RADIUS)
+    """Initialize a circle with randomized bounds, velocities, and lifespan."""
+    # Pick one of the explicit default size tiers instead of an arbitrary radius.
+    radius = random.choice(CIRCLE_SIZE_OPTIONS)
 
-    # Make sure they spawn fully inside the screen
+    # Spawn within screen bounds
     x = random.randint(radius, SCREEN_WIDTH - radius)
     y = random.randint(radius, SCREEN_HEIGHT - radius)
 
@@ -70,8 +80,6 @@ def create_random_circle() -> Circle:
     vy = random.choice([-1, 1]) * float(start_speed_y)
     
     base_speed = math.hypot(vx, vy)
-    
-    # give it 30 to 180 secs to live
     lifespan = random.uniform(30.0, 180.0) 
 
     color = (
@@ -84,13 +92,12 @@ def create_random_circle() -> Circle:
 
 
 def create_circles(count: int) -> list[Circle]:
-    """Create a list of random circles."""
-    circles = [create_random_circle() for _ in range(count)]
-    return circles
+    """Generate the initial list of circle entities."""
+    return [create_random_circle() for _ in range(count)]
 
 
 def _build_spatial_grid(circles: list[Circle], cell_size: float) -> dict[tuple[int, int], list[Circle]]:
-    """partitions circles into a grid for fast neighbor lookups."""
+    """Partition circles into a spatial hash grid for O(1) local neighbor lookups."""
     grid: dict[tuple[int, int], list[Circle]] = {}
     for circle in circles:
         cell = (int(circle.x // cell_size), int(circle.y // cell_size))
@@ -101,24 +108,28 @@ def _build_spatial_grid(circles: list[Circle], cell_size: float) -> dict[tuple[i
 
 
 def _apply_boundary(circle: Circle) -> None:
-    # Use radius to bounce off the edges correctly
+    """Clamp positions to screen edges and invert velocity only if heading out of bounds."""
     if circle.x - circle.radius <= 0:
         circle.x = circle.radius
-        circle.vx *= -1
+        if circle.vx < 0:  
+            circle.vx *= -1
     elif circle.x + circle.radius >= SCREEN_WIDTH:
         circle.x = SCREEN_WIDTH - circle.radius
-        circle.vx *= -1
+        if circle.vx > 0:  
+            circle.vx *= -1
 
     if circle.y - circle.radius <= 0:
         circle.y = circle.radius
-        circle.vy *= -1
+        if circle.vy < 0:  
+            circle.vy *= -1
     elif circle.y + circle.radius >= SCREEN_HEIGHT:
         circle.y = SCREEN_HEIGHT - circle.radius
-        circle.vy *= -1
+        if circle.vy > 0:  
+            circle.vy *= -1
 
 
 def _clamp_position(circle: Circle) -> None:
-    """Clamp a circle to screen bounds without changing velocity."""
+    """Strictly constrain position to the screen without modifying momentum."""
     if circle.x - circle.radius <= 0:
         circle.x = circle.radius
     elif circle.x + circle.radius >= SCREEN_WIDTH:
@@ -131,7 +142,7 @@ def _clamp_position(circle: Circle) -> None:
 
 
 def _rotate_velocity(circle: Circle, angle_radians: float) -> None:
-    """Rotate a velocity vector by a small angle to create a wandering path."""
+    """Apply a rotation matrix to the velocity vector for wandering behavior."""
     new_vx = circle.vx * math.cos(angle_radians) - circle.vy * math.sin(angle_radians)
     new_vy = circle.vx * math.sin(angle_radians) + circle.vy * math.cos(angle_radians)
     circle.vx = new_vx
@@ -139,7 +150,7 @@ def _rotate_velocity(circle: Circle, angle_radians: float) -> None:
 
 
 def _clamp_speed(circle: Circle) -> None:
-    """Ensure the circle never exceeds its absolute maximum sprint speed."""
+    """Normalize and scale velocity if it exceeds the maximum allowed threshold."""
     speed = math.hypot(circle.vx, circle.vy)
     if speed > circle.max_speed and speed > 0:
         scale = circle.max_speed / speed
@@ -148,42 +159,45 @@ def _clamp_speed(circle: Circle) -> None:
 
 
 def apply_random_trajectory_jitter(circle: Circle, dt: float) -> None:
-    """Keep movement slightly random, scaled by delta time."""
-    # scaling by dt * 60 keeps it consistent with a 60fps baseline
+    """Introduce slight random angular deviations to paths."""
     if random.random() < JITTER_CHANCE * (dt * 60.0):
         angle = random.uniform(JITTER_ANGLE_MIN, JITTER_ANGLE_MAX)
         _rotate_velocity(circle, angle)
 
 
 def _resolve_overlaps(circles: list[Circle]) -> bool:
-    """Resolve circle overlap using a spatial grid."""
+    """Detect and resolve physical overlaps using a spatial grid and proportional displacement."""
     separated_any = False
     
-    # safe cell size is roughly 2x the max radius for overlaps
     cell_size = float(CIRCLE_MAX_RADIUS * 2)
     grid = _build_spatial_grid(circles, cell_size)
 
-    # Accumulate all overlap corrections first, then apply in one pass.
-    # This avoids mutating positions while still using the old grid buckets.
+    # Accumulate corrections first, then apply in one shot at the end of the pass.
+    # This avoids mutating positions while we are still scanning neighbor pairs.
     accumulated_dx = {id(circle): 0.0 for circle in circles}
     accumulated_dy = {id(circle): 0.0 for circle in circles}
+    index_by_id = {id(circle): i for i, circle in enumerate(circles)}
 
     for circle in circles:
         cx, cy = int(circle.x // cell_size), int(circle.y // cell_size)
         
-        # check circle's cell and the 8 surrounding cells
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
                 neighbor_cell = (cx + dx, cy + dy)
                 if neighbor_cell in grid:
                     for other in grid[neighbor_cell]:
-                        # only check each pair once by comparing memory addresses
-                        if id(circle) >= id(other):
+                        circle_id = id(circle)
+                        other_id = id(other)
+                        
+                        # Prevent double-processing pairs
+                        if index_by_id[circle_id] >= index_by_id[other_id]:
                             continue
 
                         diff_x = circle.x - other.x
                         diff_y = circle.y - other.y
-                        min_distance = circle.radius + other.radius
+                        
+                        # Add a tiny buffer to prevent rendering artifacts on boundaries
+                        min_distance = circle.radius + other.radius + 3.0
                         distance = math.hypot(diff_x, diff_y)
 
                         if distance >= min_distance:
@@ -199,21 +213,35 @@ def _resolve_overlaps(circles: list[Circle]) -> bool:
                             dir_y = diff_y / distance
                             overlap = min_distance - distance
 
-                        if circle.radius > other.radius:
-                            accumulated_dx[id(other)] -= dir_x * overlap
-                            accumulated_dy[id(other)] -= dir_y * overlap
-                        elif circle.radius < other.radius:
-                            accumulated_dx[id(circle)] += dir_x * overlap
-                            accumulated_dy[id(circle)] += dir_y * overlap
-                        else:
-                            half_overlap = overlap * 0.5
-                            accumulated_dx[id(circle)] += dir_x * half_overlap
-                            accumulated_dy[id(circle)] += dir_y * half_overlap
-                            accumulated_dx[id(other)] -= dir_x * half_overlap
-                            accumulated_dy[id(other)] -= dir_y * half_overlap
+                        # Calculate proportional displacement based on circle radii
+                        total_radius = circle.radius + other.radius
+                        ratio_circle = other.radius / total_radius
+                        ratio_other = circle.radius / total_radius
+
+                        accumulated_dx[circle_id] += dir_x * overlap * ratio_circle
+                        accumulated_dy[circle_id] += dir_y * overlap * ratio_circle
+                        accumulated_dx[other_id] -= dir_x * overlap * ratio_other
+                        accumulated_dy[other_id] -= dir_y * overlap * ratio_other
+
+                        # Relative velocity projected onto collision normal.
+                        rel_vx = circle.vx - other.vx
+                        rel_vy = circle.vy - other.vy
+                        
+                        inward_speed = rel_vx * dir_x + rel_vy * dir_y
+
+                        # Only apply bounce response when bodies are closing in.
+                        if inward_speed < 0: 
+                            # 2.0 gives a strong rebound feel for this visual simulation.
+                            bounce_factor = 2.0
+                            
+                            circle.vx -= dir_x * inward_speed * ratio_circle * bounce_factor
+                            circle.vy -= dir_y * inward_speed * ratio_circle * bounce_factor
+                            other.vx += dir_x * inward_speed * ratio_other * bounce_factor
+                            other.vy += dir_y * inward_speed * ratio_other * bounce_factor
 
                         separated_any = True
 
+    # Apply positional corrections simultaneously
     for circle in circles:
         cid = id(circle)
         circle.x += accumulated_dx[cid]
@@ -224,24 +252,24 @@ def _resolve_overlaps(circles: list[Circle]) -> bool:
 
 
 def _stabilize_positions(circles: list[Circle]) -> None:
-    """Iteratively separate overlaps and re-clamp to the screen bounds."""
+    """Iteratively separate overlaps without modifying standard velocity."""
+    # Multiple short passes are more stable than one large positional correction.
     for _ in range(OVERLAP_SOLVER_PASSES):
         changed = _resolve_overlaps(circles)
         for circle in circles:
-            _apply_boundary(circle)
+            _clamp_position(circle)
         if not changed:
             break
 
 
 def apply_magnetic_repel(circles: list[Circle], dt: float) -> None:
-    """Make smaller circles flee from larger ones using a spatial grid."""
+    """Apply continuous avoidance forces based on proximity and relative size."""
     if len(circles) < 2:
         return
 
     grid = _build_spatial_grid(circles, MAGNETIC_RADIUS)
     check_radius_sq = MAGNETIC_RADIUS * MAGNETIC_RADIUS
     
-    # Map circle id to accumulated force components
     force_x = {id(c): 0.0 for c in circles}
     force_y = {id(c): 0.0 for c in circles}
     is_repelled = {id(c): False for c in circles}
@@ -271,15 +299,16 @@ def apply_magnetic_repel(circles: list[Circle], dt: float) -> None:
 
                         dir_x = diff_x / distance
                         dir_y = diff_y / distance
-                        strength = (proximity ** 2) * MAGNETIC_FORCE
-
-                        # Apply repel force based on size relationship
-                        if circle.radius <= other.radius:
-                            force_multiplier = 2.0 if circle.radius < other.radius else 1.0
-                            force_x[id(circle)] += dir_x * strength * force_multiplier
-                            force_y[id(circle)] += dir_y * strength * force_multiplier
+                        
+                        # Hierarchical avoidance: ONLY smaller circles flee from bigger ones.
+                        # Same-sized circles will ignore this and physically collide instead.
+                        if circle.radius < other.radius:
+                            strength = (proximity ** 2) * MAGNETIC_FORCE * 2.0
+                            force_x[id(circle)] += dir_x * strength
+                            force_y[id(circle)] += dir_y * strength
                             is_repelled[id(circle)] = True
 
+    # Integrate forces to velocity; circles with no nearby threats drift back toward base speed.
     for circle in circles:
         cid = id(circle)
         if is_repelled[cid]:
@@ -288,28 +317,44 @@ def apply_magnetic_repel(circles: list[Circle], dt: float) -> None:
         else:
             current_speed = math.hypot(circle.vx, circle.vy)
             if current_speed > circle.base_speed:
-                circle.vx *= 0.95
-                circle.vy *= 0.95
+                damping = BASE_DAMPING_PER_60FPS_FRAME ** (dt * 60.0)
+                circle.vx *= damping
+                circle.vy *= damping
 
         _clamp_speed(circle)
 
 
 def lifecycle_system(circles: list[Circle], dt: float) -> None:
-    """Handle aging and rebirth of circles."""
+    """Handle aging and respawning of entities."""
     for i in range(len(circles)):
         circles[i].age += dt
         if circles[i].age >= circles[i].lifespan:
-            # Replace expired circle with a new one
             circles[i] = create_random_circle()
 
 
 def force_system(circles: list[Circle], dt: float) -> None:
-    """calculate and apply continuous forces like magnetism."""
+    """Calculate and apply continuous acceleration forces to entities."""
     apply_magnetic_repel(circles, dt)
+
+    # Apply boundary repulsion to prevent corner trapping
+    wall_margin = 50.0
+    wall_force = 1200.0 
+
+    for circle in circles:
+        if circle.x < circle.radius + wall_margin:
+            circle.vx += wall_force * dt
+        elif circle.x > SCREEN_WIDTH - circle.radius - wall_margin:
+            circle.vx -= wall_force * dt
+
+        if circle.y < circle.radius + wall_margin:
+            circle.vy += wall_force * dt
+        elif circle.y > SCREEN_HEIGHT - circle.radius - wall_margin:
+            circle.vy -= wall_force * dt
 
 
 def motion_system(circles: list[Circle], dt: float) -> None:
-    """integrate velocity, handle overlap physics, and enforce boundaries."""
+    """Integrate velocity, handle physical collisions, and enforce boundaries."""
+    # Pre-pass removes any overlaps introduced by spawn/respawn before moving this frame.
     _stabilize_positions(circles)
 
     for circle in circles:
@@ -318,23 +363,25 @@ def motion_system(circles: list[Circle], dt: float) -> None:
         apply_random_trajectory_jitter(circle, dt)
         _apply_boundary(circle)
 
+    # Post-pass resolves overlaps introduced by movement this frame.
     _stabilize_positions(circles)
 
 
 def update_circles(circles: list[Circle], dt: float) -> None:
-    """orchestrate all systems per frame."""
+    """Orchestrate all simulation systems per frame."""
+    # Update order matters: lifecycle -> force accumulation -> motion/collision solve.
     lifecycle_system(circles, dt)
     force_system(circles, dt)
     motion_system(circles, dt)
 
 
 def draw_background(screen: pygame.Surface) -> None:
-    """Render a plain black background."""
+    """Render the background."""
     screen.fill((0, 0, 0))
 
 
 def draw_circle(screen: pygame.Surface, circle: Circle) -> None:
-    """Draw one smooth anti-aliased colored circle."""
+    """Draw a single entity to the screen."""
     x, y = int(circle.x), int(circle.y)
     if gfxdraw is None:
         pygame.draw.circle(screen, circle.color, (x, y), circle.radius)
@@ -345,13 +392,13 @@ def draw_circle(screen: pygame.Surface, circle: Circle) -> None:
 
 
 def draw_circles(screen: pygame.Surface, circles: list[Circle]) -> None:
-    """Draw all circles to the screen."""
+    """Batch render all entities."""
     for circle in circles:
         draw_circle(screen, circle)
 
 
 def run() -> None:
-    """Main game loop."""
+    """Main execution loop."""
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Hierarchical Magnetic Circles")
@@ -363,6 +410,7 @@ def run() -> None:
     circles = create_circles(CIRCLE_COUNT)
     running = True
 
+    # Fixed-step render loop using frame delta for frame-rate independent motion.
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
