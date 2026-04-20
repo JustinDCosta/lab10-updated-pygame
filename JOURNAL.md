@@ -566,3 +566,8 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 18-04-2026 13:56
 - **Prompt**: Do a full analysis and check out the whole project and then update the readme  file accordingly. Also, in the main.py there are a few stubs and other comments which  makes the code look unprofessional, therefore update those with simplified comments(wherever necessary). After, commit(with appropriate message) and push to git.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 20-04-2026 12:54
+- **Prompt**: Fix the _resolve_overlaps function for me, as currently the code checks if circles are overlapping and instantly pushes them apart without updating the grid. Rewrite it so we calculate how far they should be pushed and first, store them, and then move all the circles at the very end of the function.

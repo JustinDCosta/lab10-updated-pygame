@@ -110,3 +110,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 18-04-2026 13:56
 - **Prompt**: Do a full analysis and check out the whole project and then update the readme  file accordingly. Also, in the main.py there are a few stubs and other comments which  makes the code look unprofessional, therefore update those with simplified comments(wherever necessary). After, commit(with appropriate message) and push to git.
 
+### 20-04-2026 12:54
+- **Prompt**: Fix the _resolve_overlaps function for me, as currently the code checks if circles are overlapping and instantly pushes them apart without updating the grid. Rewrite it so we calculate how far they should be pushed and first, store them, and then move all the circles at the very end of the function.
+
