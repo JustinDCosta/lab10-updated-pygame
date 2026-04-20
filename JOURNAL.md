@@ -571,3 +571,19 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 20-04-2026 12:54
 - **Prompt**: Fix the _resolve_overlaps function for me, as currently the code checks if circles are overlapping and instantly pushes them apart without updating the grid. Rewrite it so we calculate how far they should be pushed and first, store them, and then move all the circles at the very end of the function.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 12:55
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Fix the _resolve_overlaps function for me, as currently the code checks if circles are overlapping and instantly pushes them apart without updating the grid. Rewrite it so we calculate how far they should be pushed and first, store them, and then move all the circles at the very end of the function.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Rewrote _resolve_overlaps to accumulate per-circle displacement vectors during overlap checks and apply all position updates in one final pass, followed by clamping.
+- **Context and Reasons for Changes**: User requested avoiding immediate in-loop movement because it used stale grid positions; deferred application keeps overlap checks consistent within each solver pass.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 20-04-2026 12:58
+- **Prompt**: commit the new change and push it to git
