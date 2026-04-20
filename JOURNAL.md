@@ -619,3 +619,19 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 20-04-2026 13:18
 - **Prompt**: Fix the issues correctly and add comments for places in the whole code, so as to help any other programmer understand it.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 13:19
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Fix the issues correctly and add comments for places in the whole code, so as to help any other programmer understand it.
+- **CoPilot Mode**: Edit
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Fixed overlap stabilization boundary behavior, made base-speed damping frame-rate independent, switched overlap pair de-duplication to stable list-order indexing, and added explanatory comments across major systems in main.py.
+- **Context and Reasons for Changes**: User requested issue fixes plus readability improvements for other programmers; updates preserve existing architecture while improving correctness and maintainability.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 20-04-2026 13:49
+- **Prompt**: Make 3 default sizes for the circles, small, medium and big. The big should be 3x the size of the current version. Do this while keeping the code and logic intact

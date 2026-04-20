@@ -122,3 +122,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 20-04-2026 13:18
 - **Prompt**: Fix the issues correctly and add comments for places in the whole code, so as to help any other programmer understand it.
 
+### 20-04-2026 13:49
+- **Prompt**: Make 3 default sizes for the circles, small, medium and big. The big should be 3x the size of the current version. Do this while keeping the code and logic intact
+
