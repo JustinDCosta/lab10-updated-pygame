@@ -134,3 +134,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 20-04-2026 14:07
 - **Prompt**: Append a new entry at the end of JOURNAL.md using the repository template, timestamped April 20, 2026. Summarize this interaction: reviewed updated main.py where CIRCLE_COUNT is 20 and size tiers were user-adjusted, performed correctness check (no static errors), and edited/added explanatory comments in important sections (constants, overlap solver, force integration, motion pre/post stabilization, update order, main loop) without changing program logic.
 
+### 20-04-2026 14:10
+- **Prompt**: do it correclty
+
