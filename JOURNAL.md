@@ -603,3 +603,19 @@ I have made a few changes on the code to make the app more perfect. I would like
 - **Hook Version**: 1.02
 - **Date**: 20-04-2026 13:09
 - **Prompt**: Do a full check in the code and find out any issues, if any.
+
+### **New Interaction**
+- **Agent Version**: 2.3
+- **Date**: 20-04-2026 13:11
+- **User**: justin.d-costa@epita.fr
+- **Prompt**: Do a full check in the code and find out any issues, if any.
+- **CoPilot Mode**: Agent
+- **CoPilot Model**: GPT-5.3-Codex
+- **Socratic Mode**: ON
+- **Changes Made**: Performed static diagnostics and manual behavior audit on main.py; identified boundary-velocity inversion risk during stabilization and frame-rate-dependent damping behavior.
+- **Context and Reasons for Changes**: User asked for a full code check to identify issues; no source logic was modified in this interaction.
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 20-04-2026 13:18
+- **Prompt**: Fix the issues correctly and add comments for places in the whole code, so as to help any other programmer understand it.

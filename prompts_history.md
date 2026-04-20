@@ -119,3 +119,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 20-04-2026 13:09
 - **Prompt**: Do a full check in the code and find out any issues, if any.
 
+### 20-04-2026 13:18
+- **Prompt**: Fix the issues correctly and add comments for places in the whole code, so as to help any other programmer understand it.
+
