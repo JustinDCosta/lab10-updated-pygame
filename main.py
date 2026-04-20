@@ -163,14 +163,10 @@ def _resolve_overlaps(circles: list[Circle]) -> bool:
     cell_size = float(CIRCLE_MAX_RADIUS * 2)
     grid = _build_spatial_grid(circles, cell_size)
 
-    def move_and_clamp(circle: Circle, dx: float, dy: float) -> None:
-        circle.x += dx
-        circle.y += dy
-        _clamp_position(circle)
-
-    def overlap_amount(a: Circle, b: Circle) -> float:
-        distance = math.hypot(a.x - b.x, a.y - b.y)
-        return (a.radius + b.radius) - distance
+    # Accumulate all overlap corrections first, then apply in one pass.
+    # This avoids mutating positions while still using the old grid buckets.
+    accumulated_dx = {id(circle): 0.0 for circle in circles}
+    accumulated_dy = {id(circle): 0.0 for circle in circles}
 
     for circle in circles:
         cx, cy = int(circle.x // cell_size), int(circle.y // cell_size)
@@ -204,26 +200,25 @@ def _resolve_overlaps(circles: list[Circle]) -> bool:
                             overlap = min_distance - distance
 
                         if circle.radius > other.radius:
-                            move_and_clamp(other, -dir_x * overlap, -dir_y * overlap)
-                            remaining = overlap_amount(circle, other)
-                            if remaining > 0:
-                                move_and_clamp(circle, dir_x * remaining, dir_y * remaining)
+                            accumulated_dx[id(other)] -= dir_x * overlap
+                            accumulated_dy[id(other)] -= dir_y * overlap
                         elif circle.radius < other.radius:
-                            move_and_clamp(circle, dir_x * overlap, dir_y * overlap)
-                            remaining = overlap_amount(circle, other)
-                            if remaining > 0:
-                                move_and_clamp(other, -dir_x * remaining, -dir_y * remaining)
+                            accumulated_dx[id(circle)] += dir_x * overlap
+                            accumulated_dy[id(circle)] += dir_y * overlap
                         else:
                             half_overlap = overlap * 0.5
-                            move_and_clamp(circle, dir_x * half_overlap, dir_y * half_overlap)
-                            move_and_clamp(other, -dir_x * half_overlap, -dir_y * half_overlap)
-                            remaining = overlap_amount(circle, other)
-                            if remaining > 0:
-                                correction = remaining * 0.5
-                                move_and_clamp(circle, dir_x * correction, dir_y * correction)
-                                move_and_clamp(other, -dir_x * correction, -dir_y * correction)
+                            accumulated_dx[id(circle)] += dir_x * half_overlap
+                            accumulated_dy[id(circle)] += dir_y * half_overlap
+                            accumulated_dx[id(other)] -= dir_x * half_overlap
+                            accumulated_dy[id(other)] -= dir_y * half_overlap
 
                         separated_any = True
+
+    for circle in circles:
+        cid = id(circle)
+        circle.x += accumulated_dx[cid]
+        circle.y += accumulated_dy[cid]
+        _clamp_position(circle)
 
     return separated_any
 
